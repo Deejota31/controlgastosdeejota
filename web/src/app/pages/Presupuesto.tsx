@@ -172,7 +172,7 @@ export function Presupuesto() {
               {fuentes.length === 0 ? (
                 <EmptyState icono={<Wallet className="size-7" aria-hidden />} titulo="Sin fuentes" mensaje="Crea la primera para poder calcular tu presupuesto." />
               ) : (
-                <ul className="grid gap-3 lg:grid-cols-2" aria-label="Fuentes de ingreso">
+                <ul className="grid grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-2" aria-label="Fuentes de ingreso">
                   {fuentes.map((f) => {
                     const e = estadoEnMes(vista.fuentes_mes, 'fuente_id', f.id, mes)
                     const i = idsFuentes.indexOf(f.id)
@@ -245,7 +245,7 @@ export function Presupuesto() {
               {cajasVisibles.length === 0 ? (
                 <EmptyState icono={<Wallet className="size-7" aria-hidden />} titulo={vista.cajas.length ? 'Ninguna caja coincide' : 'Sin cajas'} mensaje={vista.cajas.length ? 'Cambia la búsqueda o los filtros.' : 'Una caja reserva dinero para una categoría, un ámbito o un medio de pago.'} />
               ) : (
-                <ul className="grid gap-3 lg:grid-cols-2" aria-label="Cajas">
+                <ul className="grid grid-cols-[minmax(0,1fr)] gap-3 lg:grid-cols-2" aria-label="Cajas">
                   {cajasVisibles.map((fila) => {
                     const c = fila.caja
                     const i = idsCajas.indexOf(c.id)

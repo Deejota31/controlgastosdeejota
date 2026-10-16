@@ -53,7 +53,7 @@ export function TarjetaFuente({ fuente: f, mes, estado, montoMes, calculo, medio
   const asignado = calculo ? calculo.asignado : 0
   const pct = asignado > 0 ? (consumido / asignado) * 100 : 0
   return (
-    <li className={cn('grid gap-3 rounded-card border border-line bg-surface p-4 shadow-1', !f.activo && 'opacity-80')} aria-busy={pendiente || undefined}>
+    <li className={cn('grid min-w-0 gap-3 rounded-card border border-line bg-surface p-4 shadow-1', !f.activo && 'opacity-80')} aria-busy={pendiente || undefined}>
       <div className="flex items-start gap-3">
         <InsigniaIcono icono={f.icono} color={f.color} />
         <div className="min-w-0 flex-1">
@@ -126,7 +126,7 @@ export function TarjetaCaja({ caja: c, estado, montoMes, calculo, etiquetaAlcanc
   const pct = calculo ? pctDeUso(calculo.asignado, calculo.gastado) : null
   const barra = calculo?.estado === 'excedida' ? 'excedido' : calculo?.estado === 'critico' ? 'critico' : calculo?.estado === 'atencion' ? 'atencion' : 'ok'
   return (
-    <li className={cn('grid gap-3 rounded-card border border-line bg-surface p-4 shadow-1', !c.activo && 'opacity-80')} aria-busy={pendiente || undefined}>
+    <li className={cn('grid min-w-0 gap-3 rounded-card border border-line bg-surface p-4 shadow-1', !c.activo && 'opacity-80')} aria-busy={pendiente || undefined}>
       <div className="flex items-start gap-3">
         <InsigniaIcono icono={c.icono} color={c.color} />
         <div className="min-w-0 flex-1">

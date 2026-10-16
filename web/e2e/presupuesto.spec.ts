@@ -67,6 +67,14 @@ test.describe('Presupuesto (demo)', () => {
       await expect(page.getByRole('heading', { name: 'Presupuesto', level: 2 })).toBeVisible()
       const d = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
       expect(d, `desborde a ${w}px`).toBeLessThanOrEqual(0)
+      // Con datos de ejemplo las tarjetas son más anchas: se revisa cada pestaña.
+      await page.goto('/?demo#/presupuesto')
+      for (const pestana of [/Fuentes/, /Cajas/, /Plantillas/]) {
+        await page.getByRole('tab', { name: pestana }).click()
+        const dp = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+        expect(dp, `desborde en ${String(pestana)} a ${w}px`).toBeLessThanOrEqual(0)
+      }
+      await page.goto('/?demo&vacio=1#/presupuesto')
       await page.getByRole('button', { name: /^(Crear mi primera fuente|Nueva fuente)$/ }).first().click()
       const dlg = page.getByRole('dialog', { name: 'Nueva fuente' })
       await expect(dlg).toBeVisible()
