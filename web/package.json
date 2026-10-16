@@ -16,6 +16,7 @@
     "test:ui": "vitest run",
     "test:backend": "vitest run --config vitest.backend.config.mjs",
     "sync:check": "node ../scripts/sync-shared.mjs --check",
+    "docs:check": "node ../scripts/docs/generar-api.mjs --check && node ../scripts/matriz/generar.mjs --check",
     "bench": "vitest run src/engine/rendimiento.test.ts"
   },
   "dependencies": {

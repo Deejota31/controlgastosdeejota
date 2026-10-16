@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { ApiError, crearCliente, nuevoRequestId, type Cliente } from '@/api/cliente'
+import { verificarCompatibilidad } from '@/api/compat'
 import { Cola, almacenIndexedDb, type ItemCola } from '@/api/cola'
 import { coordinadorLocal, coordinadorWeb, type Coordinador, type Mensaje } from '@/api/coordinador'
 import { idEntorno } from '@/lib/entorno'
@@ -57,7 +58,11 @@ export interface DatosState {
   almacenLocalOk: boolean
   /** Identificador de la hoja conectada (separa colas y cachés); null en demo o sin conexión. */
   entorno: string | null
+  /** El Code.gs desplegado no es compatible con esta app: no se envían escrituras. */
+  incompatible: boolean
   iniciar: () => Promise<void>
+  /** Carga los datos de un bootstrap ya pedido (el de la prueba de conexión) sin volver a pedirlo. */
+  adoptarBootstrap: (datos: unknown) => void
   refrescar: () => Promise<void>
   mutar: <T = unknown>(action: string, payload: Record<string, unknown>) => Promise<ResultadoMutacion<T>>
   reintentarAhora: () => void
@@ -166,16 +171,23 @@ export function crearDatos(deps: DepsDatos = {}) {
       }, 400)
     }
 
-    const bootstrap = async () => {
-      const r = await cliente.llamar<{ hojas: unknown; config: Record<string, string>; generacion: string; ahora: string; zona_horaria?: string }>('bootstrap', {})
+    type DatosBootstrap = { hojas: unknown; config: Record<string, string>; generacion: string; ahora: string; zona_horaria?: string; esquema?: number; version_backend?: string }
+    const aplicarBootstrap = (datos: DatosBootstrap) => {
+      verificarCompatibilidad(datos) // si no es compatible no se habilitan escrituras
+      const r = { data: datos }
       const { hojas, descartadas } = validarHojas(r.data.hojas)
       const confirmado: Hojas = { ...hojasVacias(), ...hojas }
       set({
         generacion: r.data.generacion, ultimoAhora: r.data.ahora, zona: r.data.zona_horaria ?? get().zona, descartadas,
         estado: 'listo', error: null, ultimaSync: Date.now(),
       })
+      set({ incompatible: false })
       recalcular({ confirmado, config: r.data.config })
       programarGuardado()
+    }
+    const bootstrap = async () => {
+      const r = await cliente.llamar<DatosBootstrap>('bootstrap', {})
+      aplicarBootstrap(r.data)
     }
 
     const aplicarDelta = (d: { hojas?: unknown; eliminados?: Array<{ entidad: string; entidad_id: string }>; generacion: string; ahora: string }) => {
@@ -218,6 +230,7 @@ export function crearDatos(deps: DepsDatos = {}) {
         const ae = e instanceof ApiError ? e : new ApiError('RED', 'No hay conexión con el servidor.')
         set({ enLinea: ae.code !== 'RED' && ae.code !== 'TIEMPO', error: get().estado === 'listo' ? null : ae.message, estado: get().estado === 'listo' ? 'listo' : 'error' })
         if (ae.code === 'AUTH' || ae.code === 'SCHEMA') set({ error: ae.message })
+        if (ae.code === 'SCHEMA') set({ incompatible: true })
       } finally {
         set({ sincronizando: false })
       }
@@ -308,7 +321,7 @@ export function crearDatos(deps: DepsDatos = {}) {
 
     /** Envía lo que esté listo: hasta 2 peticiones a la vez, nunca dos de la misma entidad ni antes que sus dependencias. */
     const procesar = () => {
-      if (!coord.esLider || enEspera || get().pausada) return
+      if (!coord.esLider || enEspera || get().pausada || get().incompatible) return
       // Sin red no se intenta: así lo pendiente sigue sin enviar (y se puede fusionar) hasta que vuelva.
       if (typeof navigator !== 'undefined' && navigator.onLine === false) {
         set({ enLinea: false })
@@ -420,6 +433,11 @@ export function crearDatos(deps: DepsDatos = {}) {
       pausada: false,
       almacenLocalOk: true,
       entorno: null,
+      incompatible: false,
+      adoptarBootstrap(datos) {
+        aplicarBootstrap(datos as DatosBootstrap)
+        set({ estado: 'listo' })
+      },
 
       /** Una sola carga a la vez: quien llame mientras otra está en curso espera a esa misma. */
       iniciar() {
@@ -484,7 +502,7 @@ export function crearDatos(deps: DepsDatos = {}) {
         if (k) await borrarGrande(k)
         set({
           confirmado: hojasVacias(), vista: hojasVacias(), pendientes: [], config: {}, generacion: null, ultimoAhora: null,
-          estado: 'inicial', error: null, fallos: [], descartadas: 0, ultimaSync: null, pausada: false, porConfirmar: 0,
+          estado: 'inicial', error: null, fallos: [], descartadas: 0, ultimaSync: null, pausada: false, porConfirmar: 0, incompatible: false,
         })
       },
     }

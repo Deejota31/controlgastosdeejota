@@ -6,8 +6,8 @@
 
 ## Resumen (306 requisitos)
 
-- pendiente: **255**
-- verificado en demo: **39**
+- pendiente: **237**
+- verificado en demo: **57**
 - en curso: **11**
 - implementado sin verificar: **1**
 
@@ -32,32 +32,32 @@
 | GEN-03 | develop sincronizado con main sin force-push | B2 | git |  | — |  |  | git merge origin/main en develop sin force-push | verificado en demo |  |
 | GEN-04 | Piezas independientes identificadas: commit frontend / deployment Apps Script / spreadsheet | B2 | docs |  | — |  |  |  | pendiente |  |
 | PRO-01 | No se ejecuta setup/reparación/importación/datos de prueba contra producción | C1 | Procesos |  | — |  |  |  | pendiente |  |
-| PRO-02 | Ninguna prueba de escritura apunta a la hoja de producción (barrera por ID) | C2 | Pruebas |  | — |  |  |  | pendiente |  |
+| PRO-02 | Ninguna prueba de escritura apunta a la hoja de producción (barrera por ID) | C2 | Pruebas | shared/barrera-produccion.mjs (huella SHA-256); el simulador y la barrera abortan con la hoja real | — | web/tests-backend/barrera.test.mjs |  |  | verificado en demo |  |
 | PRO-03 | Entorno de pruebas identificable en backend y frontend (testRunId, datos TEST-) | C2 | Pruebas |  | _meta, config |  |  |  | pendiente |  |
-| PRO-04 | Identidades, tokens, cachés, IndexedDB y colas separados por entorno y hoja | C2 | Almacén local |  | — |  |  |  | pendiente |  |
-| PRO-05 | Demo en memoria: no lee ni modifica credenciales, caché ni registros reales | C2/J4.2 | Demo |  | — |  |  |  | pendiente |  |
-| PRO-06 | Sin tokens en código, VITE_*, bundle, Git, logs ni capturas | C3 | Build |  | — |  |  |  | pendiente |  |
-| API-01 | docs/API.md con todas las acciones, payloads, errores y ejemplos sin secretos | D2 | docs |  | todas |  |  |  | pendiente |  |
+| PRO-04 | Identidades, tokens, cachés, IndexedDB y colas separados por entorno y hoja | C2 | Almacén local | Cola, instantánea y coordinación separadas por entorno (hash de la URL) | — | web/src/api/cola.test.ts, web/src/store/datos.cola.test.ts |  |  | verificado en demo |  |
+| PRO-05 | Demo en memoria: no lee ni modifica credenciales, caché ni registros reales | C2/J4.2 | Demo | La demo vive en memoria y no toca credenciales, colas ni IndexedDB | — | web/e2e/conexion.spec.ts |  |  | verificado en demo |  |
+| PRO-06 | Sin tokens en código, VITE_*, bundle, Git, logs ni capturas | C3 | Build | Escaneo de credenciales en archivos versionados | — | web/tests-backend/barrera.test.mjs |  |  | verificado en demo | Falta escaneo del bundle y de capturas |
+| API-01 | docs/API.md con todas las acciones, payloads, errores y ejemplos sin secretos | D2 | docs | docs/API.md generado desde Code.gs (62 acciones) y comprobado en CI | todas | scripts/docs/generar-api.mjs --check |  |  | verificado en demo |  |
 | API-02 | POST /exec text/plain con token en cuerpo y requestId; redirecciones y CORS reales verificados | D2/J3.1 | Transporte |  | — |  |  |  | pendiente |  |
 | API-03 | Sin no-cors para lecturas/escrituras de negocio; el ping opaco no autentica | D2 | Transporte |  | — |  |  |  | pendiente |  |
 | API-04 | GET público solo salud/versión mínima | D2/J3.1 | doGet | Code.gs doGet | — | backend.test.mjs |  | apps-script/test + web/tests-backend/backend.test.mjs (simulador de Apps Script) | verificado en demo |  |
-| API-05 | Validación de versión de API/esquema antes de habilitar escrituras | D2 | Conexión |  | bootstrap |  |  |  | pendiente |  |
-| API-06 | Una conexión incompatible no guarda credenciales ni invalida la previa | D2 | Conexión |  | — |  |  |  | pendiente |  |
-| API-07 | Un solo bootstrap al conectar (prueba reutilizada) | D2 | Conexión |  | bootstrap |  |  |  | pendiente |  |
+| API-05 | Validación de versión de API/esquema antes de habilitar escrituras | D2 | Conexión | api/compat.ts: versión y esquema exigidos antes de guardar y de escribir | bootstrap | web/src/api/compat.test.ts, web/src/store/datos.test.ts |  |  | verificado en demo |  |
+| API-06 | Una conexión incompatible no guarda credenciales ni invalida la previa | D2 | Conexión | probarConexion verifica antes de conectar; el flujo revierte si falla | — | web/src/api/compat.test.ts, web/src/app/App.test.tsx |  |  | verificado en demo |  |
+| API-07 | Un solo bootstrap al conectar (prueba reutilizada) | D2 | Conexión | Configuracion reutiliza el bootstrap de la prueba (adoptarBootstrap) | bootstrap | web/src/app/App.test.tsx |  |  | verificado en demo |  |
 | API-08 | Estados diferenciados: sin config, cargando, vacío, error, offline, datos sin confirmar | D2/J5.5 | Global |  | — |  |  |  | pendiente |  |
-| IDP-01 | UUID y requestId una sola vez por operación lógica, conservados en reintentos | D3 | Cola |  | — |  |  |  | pendiente |  |
+| IDP-01 | UUID y requestId una sola vez por operación lógica, conservados en reintentos | D3 | Cola | nuevoRequestId una vez por mutar; reintentos con el mismo | — | web/src/store/datos.cola.test.ts |  |  | verificado en demo |  |
 | IDP-02 | Deduplicación persistente además de la caché de 500 | D3 | Backend | Code.gs: op:<requestId> en _meta con respuesta y huella (sobrevive a la caché) | _meta (op:<requestId>) | web/tests-backend/durabilidad.test.mjs |  |  | verificado en demo |  |
 | IDP-03 | Dos peticiones iguales simultáneas no crean dos filas | D3 | Backend |  | lock |  |  |  | pendiente |  |
 | IDP-04 | requestId reutilizado con payload distinto → conflicto/validación | D3 | Backend | Code.gs: huellaPeticion; CONFLICT campo requestId | — | web/tests-backend/durabilidad.test.mjs |  |  | verificado en demo |  |
-| IDP-05 | Respuesta perdida → "pendiente de confirmar" y reconciliación por ID/versión/contenido | D3 | Cola/Store |  | cambios |  |  |  | pendiente |  |
-| IDP-06 | Solo un rechazo definitivo revierte la proyección optimista | D3 | Store |  | — |  |  |  | pendiente |  |
-| IDP-07 | Backoff con jitter, límite de intentos; no reintenta AUTH/VALIDATION/CONFLICT/SCHEMA; clasifica HTML/redirecciones | D3 | Cliente |  | — |  |  |  | pendiente |  |
-| IDP-08 | La cola se persiste antes de comunicar "guardado localmente"; si falla, se informa | D3 | Cola |  | — |  |  |  | pendiente |  |
-| IDP-09 | La cola conserva dependencias entre entidades; un lote no se ejecuta parcial ni se reordena | D3 | Cola |  | — |  |  |  | pendiente |  |
-| IDP-10 | Coordinación entre pestañas: la cola no se procesa dos veces | D3 | Cola |  | — |  |  |  | pendiente |  |
-| IDP-11 | Cambiar hoja/desconectar/actualizar PWA no descarta pendientes en silencio | D3 | Configuración/PWA |  | — |  |  |  | pendiente |  |
-| IDP-12 | Máximo 2 peticiones en paralelo, en serie por entidad | J4.1 | Cola |  | — |  |  |  | pendiente |  |
-| IDP-13 | Persistencia de la cola en IndexedDB con aviso si no hay almacenamiento | J4.1 | Cola |  | — |  |  |  | pendiente |  |
+| IDP-05 | Respuesta perdida → "pendiente de confirmar" y reconciliación por ID/versión/contenido | D3 | Cola/Store | Estado «por confirmar» + reenvío con el mismo requestId; el servidor devuelve la respuesta original | cambios | web/src/store/datos.cola.test.ts, web/tests-backend/durabilidad.test.mjs |  |  | verificado en demo |  |
+| IDP-06 | Solo un rechazo definitivo revierte la proyección optimista | D3 | Store | Solo ApiError definitivo quita la proyección optimista | — | web/src/store/datos.test.ts |  |  | verificado en demo |  |
+| IDP-07 | Backoff con jitter, límite de intentos; no reintenta AUTH/VALIDATION/CONFLICT/SCHEMA; clasifica HTML/redirecciones | D3 | Cliente | Backoff exponencial con variación ±20 %, pausa tras 10 fallos, SCHEMA para HTML/redirección | — | web/src/store/datos.cola.test.ts, web/src/demo/demo-url.test.ts |  |  | verificado en demo |  |
+| IDP-08 | La cola se persiste antes de comunicar "guardado localmente"; si falla, se informa | D3 | Cola | La cola se escribe en IndexedDB antes de difundir; aviso si falla | — | web/src/api/cola.test.ts, web/src/store/datos.cola.test.ts |  |  | verificado en demo |  |
+| IDP-09 | La cola conserva dependencias entre entidades; un lote no se ejecuta parcial ni se reordena | D3 | Cola | Dependencias por entidad/ids referenciados; el lote es una sola petición | — | web/src/api/cola.test.ts, web/src/store/datos.cola.test.ts |  |  | verificado en demo |  |
+| IDP-10 | Coordinación entre pestañas: la cola no se procesa dos veces | D3 | Cola | Web Locks (líder) + BroadcastChannel; probado con coordinador simulado | — | web/src/store/datos.cola.test.ts |  |  | verificado en demo | Web Locks reales no probados en navegador con 2 pestañas |
+| IDP-11 | Cambiar hoja/desconectar/actualizar PWA no descarta pendientes en silencio | D3 | Configuración/PWA | reiniciar() conserva la cola por hoja; aviso con N pendientes al desconectar | — | web/src/store/datos.cola.test.ts |  |  | verificado en demo |  |
+| IDP-12 | Máximo 2 peticiones en paralelo, en serie por entidad | J4.1 | Cola | Máximo 2 en vuelo, en serie por entidad | — | web/src/api/cola.test.ts, web/src/store/datos.cola.test.ts |  |  | verificado en demo |  |
+| IDP-13 | Persistencia de la cola en IndexedDB con aviso si no hay almacenamiento | J4.1 | Cola | almacenIndexedDb por hoja (dj-cola-<entorno>) | — | web/src/api/cola.test.ts |  |  | verificado en demo |  |
 | IDP-14 | Lecturas tardías no pisan cambios confirmados ni pendientes | J4.1 | Store |  | — |  |  |  | pendiente |  |
 | LOT-01 | Lote todo o nada observable: prevalida filas y referencias antes de mutar | D4 | Backend |  | movimientos.lote |  |  |  | pendiente |  |
 | LOT-02 | Protocolo durable de preparación/confirmación/recuperación; sin estados parciales visibles | D4 | Backend | Code.gs: diario preparar→deshacer→confirmar + recuperarSiHaceFalta | _meta (op:*, opu:*), OP_EN_CURSO | web/tests-backend/durabilidad.test.mjs |  |  | verificado en demo | Atomicidad real de Google no verificada: ver docs/ESTADO-IMPLEMENTACION.md |

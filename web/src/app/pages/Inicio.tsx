@@ -1,22 +1,22 @@
 import { useMemo } from 'react'
 import { KpiCard } from '@/components/KpiCard'
 import { aCentimos, formatoMoneda } from '@/engine/dinero'
+import { useHoy } from '@/lib/fecha'
 import { useDatos } from '@/store/datos'
-
-const hoyLima = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima' }).format(new Date())
 
 /** Resumen mínimo con los datos reales del store; el panel completo llega con la fase de Inicio y análisis. */
 export function Inicio() {
   const vista = useDatos((s) => s.vista)
+  const hoy = useHoy(useDatos((s) => s.zona))
   const resumen = useMemo(() => {
     const activos = vista.movimientos.filter((m) => m.estado === 'activo')
-    const mes = hoyLima().slice(0, 7)
+    const mes = hoy.slice(0, 7)
     const delMes = activos.filter((m) => m.fecha.startsWith(mes))
     const sinTC = delMes.filter((m) => m.monto_base === null).length
     const totalMes = delMes.reduce((a, m) => a + (m.monto_base === null ? 0 : aCentimos(m.monto_base)), 0)
     const ultimos = [...activos].sort((a, b) => (a.fecha === b.fecha ? b.creado_en.localeCompare(a.creado_en) : b.fecha.localeCompare(a.fecha))).slice(0, 5)
     return { total: activos.length, delMes: delMes.length, totalMes, sinTC, ultimos }
-  }, [vista.movimientos])
+  }, [vista.movimientos, hoy])
   const nombre = (id: string) => vista.subcategorias.find((s) => s.id === id)?.nombre ?? vista.categorias.find((c) => c.id === id)?.nombre ?? '—'
 
   return (

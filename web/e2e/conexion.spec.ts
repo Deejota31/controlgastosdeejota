@@ -27,4 +27,25 @@ test.describe('Conexión y demo', () => {
     await expect(page.locator('ul li').first()).toBeVisible()
     expect(await page.evaluate(() => localStorage.getItem('dj.conexion.v1'))).toBeNull()
   })
+
+  test('la demo no lee ni modifica la conexión real guardada y no llama a Google', async ({ page }) => {
+    const real = JSON.stringify({ modo: 'real', url: 'https://script.google.com/macros/s/AKfycbxAbCdEfGhIjKlMnOpQrStUv/exec', token: 'token-de-prueba-no-real' })
+    await page.addInitScript((valor) => {
+      if (!localStorage.getItem('dj.conexion.v1')) localStorage.setItem('dj.conexion.v1', valor)
+    }, real)
+    const externas: string[] = []
+    page.on('request', (r) => {
+      const u = new URL(r.url())
+      if (u.hostname !== 'localhost' && u.hostname !== '127.0.0.1') externas.push(r.url())
+    })
+    await page.goto('/?demo=30#/')
+    await expect(page.getByText('Movimientos en total')).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByText(/Estás en modo demo/)).toBeVisible()
+    expect(await page.evaluate(() => localStorage.getItem('dj.conexion.v1'))).toBe(real)
+    expect(await page.evaluate(() => localStorage.getItem('dj.cola.v1'))).toBeNull()
+    expect(externas.filter((u) => u.includes('google'))).toEqual([])
+    // Crear un gasto en la demo tampoco deja rastro local.
+    const dbs = await page.evaluate(async () => (await indexedDB.databases?.())?.map((d) => d.name) ?? [])
+    expect(dbs.filter((n) => n?.startsWith('dj-cola-'))).toEqual([])
+  })
 })

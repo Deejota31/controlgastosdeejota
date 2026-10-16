@@ -1,4 +1,5 @@
-import { leerParametrosDemo, urlSinDemo } from '@/demo/parametros'
+import { urlSinDemo } from '@/demo/parametros'
+import { navegador } from '@/lib/navegador'
 import { CloudCheck, CloudOff, Loader2, FlaskConical } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useConexion } from '@/store/conexion'
@@ -58,29 +59,22 @@ export function EstadoSync({ className }: { className?: string }) {
 
 export function BannerDemo() {
   const modo = useConexion((s) => s.modo)
-  const desconectar = useConexion((s) => s.desconectar)
-  const reiniciar = useDatos((s) => s.reiniciar)
   if (modo !== 'demo') return null
-  const enUrl = leerParametrosDemo() !== null
   return (
     <div role="status" className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-accent-soft px-4 py-1.5 text-center text-sm text-ink">
       <FlaskConical className="size-4 shrink-0" aria-hidden />
-      <span>{enUrl ? 'Estás en modo demo · los datos viven en memoria y se pierden al recargar' : 'Estás en modo demo · lo que registres vive solo en este navegador'}</span>
-      <a className="font-semibold underline underline-offset-2" href="#/configuracion">
-        Conectar mi hoja
-      </a>
+      <span>Estás en modo demo · los datos viven en memoria y se pierden al recargar</span>
       <button
         type="button"
         className="font-semibold underline underline-offset-2"
-        onClick={() => {
-          if (enUrl) {
-            location.href = urlSinDemo()
-            return
-          }
-          desconectar()
-          void reiniciar()
-          window.location.hash = '#/'
-        }}
+        onClick={() => navegador.irA(urlSinDemo().split('#')[0] + '#/configuracion')}
+      >
+        Conectar mi hoja
+      </button>
+      <button
+        type="button"
+        className="font-semibold underline underline-offset-2"
+        onClick={() => navegador.irA(urlSinDemo())}
       >
         Salir de la demo
       </button>

@@ -12,6 +12,7 @@ import zlib from 'node:zlib'
 import crypto from 'node:crypto'
 import { fileURLToPath } from 'node:url'
 import { crearServicios } from './gas-core.mjs'
+import { exigirEntornoDePrueba } from '../../shared/barrera-produccion.mjs'
 
 const AQUI = path.dirname(fileURLToPath(import.meta.url))
 export const RUTA_CODE_GS = path.join(AQUI, '..', 'Code.gs')
@@ -38,6 +39,7 @@ export function crearEntorno(opciones = {}) {
     },
   })
   const { stats, logs, errores, archivosDrive, estado, libro: principal, libros, props, cache: mapaCache, carpetas } = S
+  exigirEntornoDePrueba(principal.getId(), 'el simulador de Apps Script')
   const { SpreadsheetApp, CacheService, PropertiesService, LockService, Utilities, ContentService, MimeType, DriveApp } = S
   const consola = S.console
   const Libro = S.Libro, Hoja = S.Hoja

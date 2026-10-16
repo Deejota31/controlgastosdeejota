@@ -78,6 +78,7 @@ function ConexionForm({ onCancelar }: { onCancelar?: () => void }) {
       // Solo se guarda la conexión si la prueba salió bien.
       await useDatos.getState().reiniciar()
       useConexion.getState().conectar(url, token)
+      useDatos.getState().adoptarBootstrap(r.datos) // se reutiliza el bootstrap de la prueba: no se pide dos veces
       await useDatos.getState().iniciar()
       if (useDatos.getState().estado !== 'listo') throw new ApiError('SERVER_ERROR', useDatos.getState().error ?? 'No se pudieron cargar los datos de tu hoja.')
       toast.ok(`Conectado · versión ${r.version} · ${r.ms} ms`)

@@ -1,4 +1,4 @@
-import { writeFileSync, existsSync } from 'node:fs'
+import { writeFileSync, existsSync, readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { AUD, GEN } from './filas-a.mjs'
@@ -62,5 +62,15 @@ ${resumen}
 |---|---|---|---|---|---|---|---|---|---|---|
 ${cuerpo.join('\n')}
 `
-writeFileSync(join(raiz, 'docs', 'MATRIZ-REQUISITOS.md'), md)
-console.log(`Matriz: ${filas.length} filas`, cuenta)
+const destino = join(raiz, 'docs', 'MATRIZ-REQUISITOS.md')
+if (process.argv.includes('--check')) {
+  const actual = existsSync(destino) ? readFileSync(destino, 'utf8') : ''
+  if (actual !== md) {
+    console.error('docs/MATRIZ-REQUISITOS.md está desactualizada. Ejecuta: node scripts/matriz/generar.mjs')
+    process.exit(1)
+  }
+  console.log('Matriz al día')
+} else {
+  writeFileSync(destino, md)
+  console.log(`Matriz: ${filas.length} filas`, cuenta)
+}

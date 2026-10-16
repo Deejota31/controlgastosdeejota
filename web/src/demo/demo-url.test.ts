@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { ApiError, esperaReintento, nuevoId } from '@/api/cliente'
 import { crearTransporteDemo } from '@/store/conexion'
-import { leerParametrosDemo, urlSinDemo } from './parametros'
+import { leerParametrosDemo, urlConDemo, urlSinDemo } from './parametros'
 
 describe('parámetros de la demo', () => {
   it('interpreta ?demo=N&latencia&falla&vacio', () => {
@@ -9,6 +9,10 @@ describe('parámetros de la demo', () => {
     expect(leerParametrosDemo('?demo')).toMatchObject({ movimientos: 120, latenciaMs: 0, falla: null, vacio: false })
     expect(leerParametrosDemo('?demo=400&latencia=2000&falla=timeout&vacio=1')).toEqual({ movimientos: 400, latenciaMs: 2000, falla: 'timeout', vacio: true })
     expect(leerParametrosDemo('?demo=5&falla=raro')?.falla).toBeNull()
+  })
+  it('urlConDemo agrega ?demo conservando el resto y vuelve a Inicio', () => {
+    expect(urlConDemo('https://x.app/')).toBe('/?demo#/')
+    expect(urlConDemo('https://x.app/?otro=1#/movimientos')).toBe('/?otro=1&demo#/')
   })
   it('urlSinDemo quita solo los parámetros de demo', () => {
     expect(urlSinDemo('https://x.app/?demo=3&latencia=5&otro=1#/movimientos')).toBe('/?otro=1#/movimientos')

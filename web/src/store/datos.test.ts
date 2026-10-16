@@ -198,6 +198,26 @@ describe('store de datos', () => {
     await vi.waitFor(() => expect(b.estado().confirmado.movimientos).toHaveLength(1))
   })
 
+  it('con un Code.gs incompatible no se envían escrituras: quedan guardadas esperando', async () => {
+    const { ctl, transporte } = transporteDe(backend)
+    const alterado: Transporte = {
+      async enviar(p) {
+        const r = (await transporte.enviar(p)) as { data?: Record<string, unknown> }
+        if (p.action === 'bootstrap' && r.data) r.data['esquema'] = 2
+        return r
+      },
+    }
+    const cliente = crearCliente(() => ({ transporte: alterado, token: backend.token }))
+    const d = crearDatos({ cliente, cola: new Cola(), sinInstantanea: true, esperaReintentoMs: () => 30 })
+    await d.store.getState().iniciar()
+    expect(d.store.getState().incompatible).toBe(true)
+    expect(d.store.getState().error).toMatch(/esquema 2/)
+    void d.store.getState().mutar('movimiento.guardar', gasto({ personal: { id: 'a' }, alim: { id: 'c' }, almuerzo: { id: 's' }, yape: { id: 'm' } } as never))
+    await new Promise((r) => setTimeout(r, 80))
+    expect(ctl.llamadas.filter((c) => c.action === 'movimiento.guardar')).toHaveLength(0)
+    expect(d.store.getState().pendientes).toHaveLength(1)
+  })
+
   it('un token inválido no descarta lo escrito: queda en la cola esperando', async () => {
     const d = await dispositivo(backend)
     const malo = crearCliente(() => ({ transporte: transporteDe(backend).transporte, token: 'malo' }))

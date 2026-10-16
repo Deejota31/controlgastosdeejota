@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { ApiError, crearCliente, nuevoRequestId, transporteHttp, type Transporte } from '@/api/cliente'
+import { verificarCompatibilidad } from '@/api/compat'
 import { validarUrlWebApp } from '@/api/url'
 import { leerParametrosDemo, type ParametrosDemo } from '@/demo/parametros'
 import { borrarClave, guardarJson, leerJson } from '@/lib/almacen'
@@ -33,13 +34,13 @@ function almacenMemoria(): Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> {
 }
 
 /**
- * Transporte de demostración. Con parámetros de URL (?demo…) es determinista y en memoria; sin ellos
- * conserva el libro en el navegador. `falla` simula problemas: `red` (nada llega al servidor),
+ * Transporte de demostración: determinista y siempre en memoria (nunca lee ni escribe credenciales, colas ni
+ * datos reales del navegador). `falla` simula problemas: `red` (nada llega al servidor),
  * `timeout` (el servidor aplica el cambio pero la respuesta se pierde) y `busy` (servidor ocupado).
  */
 export async function crearTransporteDemo(pd: ParametrosDemo | null = null): Promise<{ transporte: Transporte; token: string }> {
   const { crearBackendDemo } = await import('@/demo/backend-demo')
-  const d = await crearBackendDemo({ latenciaMs: pd ? pd.latenciaMs : 60, almacen: pd ? almacenMemoria() : undefined })
+  const d = await crearBackendDemo({ latenciaMs: pd ? pd.latenciaMs : 60, almacen: almacenMemoria() })
   if (pd && !pd.vacio) {
     const { sembrarDemo } = await import('@/demo/semilla')
     const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima' }).format(new Date())
@@ -75,6 +76,8 @@ export interface ResultadoPrueba {
   ms: number
   hojas: number
   zona: string
+  /** Respuesta completa del bootstrap de la prueba: se reutiliza para no pedirlo dos veces al conectar. */
+  datos: unknown
 }
 
 /** Prueba la conexión SIN guardarla: pide el bootstrap y mide la latencia. Lanza ApiError si falla. */
@@ -84,12 +87,14 @@ export async function probarConexion(url: string, token: string, timeoutMs = 20_
   if (!token.trim()) throw new ApiError('VALIDATION', 'Pega el token de acceso.', 'token')
   const cliente = crearCliente(() => ({ transporte: transporteHttp(url.trim(), timeoutMs), token: token.trim() }))
   const t0 = performance.now()
-  const r = await cliente.llamar<{ hojas?: Record<string, unknown[]>; zona_horaria?: string }>('bootstrap', {}, { reintentos: 0 })
+  const r = await cliente.llamar<{ hojas?: Record<string, unknown[]>; zona_horaria?: string; esquema?: number; version_backend?: string }>('bootstrap', {}, { reintentos: 0 })
+  verificarCompatibilidad(r.data) // una conexión incompatible no se guarda ni toca la anterior
   return {
-    version: r.version ?? '—',
+    version: r.data.version_backend ?? r.version ?? '—',
     ms: Math.round(performance.now() - t0),
     hojas: Object.keys(r.data.hojas ?? {}).length,
     zona: r.data.zona_horaria ?? 'America/Lima',
+    datos: r.data,
   }
 }
 
@@ -107,7 +112,18 @@ export function fijarTransporte(t: Transporte | null, token = '') {
 
 const paramsDemo = leerParametrosDemo()
 /** Con ?demo en la URL se ignora (y nunca se modifica) la conexión real guardada. */
-const inicial: Guardado = paramsDemo ? { modo: 'demo', url: '', token: '' } : leerJson<Guardado>(CLAVE, { modo: 'sin-config', url: '', token: '' })
+function estadoInicial(): Guardado {
+  if (paramsDemo) return { modo: 'demo', url: '', token: '' }
+  const g = leerJson<Guardado>(CLAVE, { modo: 'sin-config', url: '', token: '' })
+  if (g.modo === 'demo') {
+    // Residuo de una versión anterior en la que la demo se guardaba en el navegador: se limpia.
+    borrarClave(CLAVE)
+    borrarClave('dj.demo.v1')
+    return { modo: 'sin-config', url: '', token: '' }
+  }
+  return g
+}
+const inicial: Guardado = estadoInicial()
 
 export const useConexion = create<ConexionState>((set, get) => ({
   ...inicial,
@@ -116,7 +132,6 @@ export const useConexion = create<ConexionState>((set, get) => ({
     const d = await crearTransporteDemo(paramsDemo)
     transporte = d.transporte
     tokenActivo = d.token
-    if (!paramsDemo) guardarJson(CLAVE, { modo: 'demo', url: '', token: '' } satisfies Guardado)
     set({ modo: 'demo', url: '', token: '', listo: true })
   },
   conectar(url, token) {

@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { PlugZap } from 'lucide-react'
 import { EmptyState } from '@/components/EmptyState'
+import { urlConDemo } from '@/demo/parametros'
+import { navegador } from '@/lib/navegador'
 import { navegar } from '@/lib/router'
-import { useConexion } from '@/store/conexion'
-import { useDatos } from '@/store/datos'
-import { toast } from '@/store/toasts'
 
 /** Estado "sin conexión configurada": nunca muestra datos falsos. */
 export function SinConexion({ modulo }: { modulo: string }) {
@@ -16,20 +15,10 @@ export function SinConexion({ modulo }: { modulo: string }) {
     } else navegar('/configuracion')
   }
 
-  async function probarDemo() {
+  /** La demo es una sola: se abre con ?demo, vive en memoria y no toca la conexión ni los datos reales guardados. */
+  function probarDemo() {
     setCargando(true)
-    try {
-      await useConexion.getState().usarDemo()
-      await useDatos.getState().iniciar()
-      if (useDatos.getState().estado === 'error') throw new Error(useDatos.getState().error ?? 'No se pudo cargar la demo.')
-      toast.ok('Modo demo activado')
-      navegar('/')
-    } catch (e) {
-      useConexion.getState().desconectar()
-      toast.error(e instanceof Error ? e.message : 'No se pudo activar el modo demo.')
-    } finally {
-      setCargando(false)
-    }
+    navegador.irA(urlConDemo())
   }
 
   return (
@@ -38,7 +27,7 @@ export function SinConexion({ modulo }: { modulo: string }) {
       titulo="Conecta tu hoja para empezar"
       mensaje={`${modulo} muestra los datos de tu hoja de Google Sheets. Conéctala o prueba la app con datos de demostración.`}
       accion={{ etiqueta: 'Conectar mi hoja', onClick: conectar }}
-      accionSecundaria={{ etiqueta: cargando ? 'Cargando demo…' : 'Probar en modo demo', onClick: () => void probarDemo(), cargando }}
+      accionSecundaria={{ etiqueta: cargando ? 'Cargando demo…' : 'Probar en modo demo', onClick: probarDemo, cargando }}
     />
   )
 }
