@@ -44,7 +44,7 @@ function inicial(m: Movimiento | undefined, hoy: string, base: string, ambitoDef
     }
   return {
     ambito: semilla?.ambito ?? ambitoDef, categoria: semilla?.categoria ?? '', sub: semilla?.sub ?? '', descripcion: semilla?.descripcion ?? '', monto: semilla?.monto ?? '',
-    moneda: semilla?.moneda ?? base, fecha: hoy, tipo: semilla?.tipo ?? 'variable', medio: semilla?.medio ?? medioDef, recurrente: semilla?.recurrente ?? false, url: '', notas: '',
+    moneda: semilla?.moneda ?? base, fecha: semilla?.fecha ?? hoy, tipo: semilla?.tipo ?? 'variable', medio: semilla?.medio ?? medioDef, recurrente: semilla?.recurrente ?? false, url: '', notas: '',
   }
 }
 

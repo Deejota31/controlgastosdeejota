@@ -8,6 +8,8 @@ export interface SemillaMov {
   categoria?: string
   sub?: string
   descripcion?: string
+  /** YYYY-MM-DD; por defecto, hoy. */
+  fecha?: string
   monto?: string
   moneda?: string
   medio?: string

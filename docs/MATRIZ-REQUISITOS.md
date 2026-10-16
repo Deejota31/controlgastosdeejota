@@ -6,8 +6,8 @@
 
 ## Resumen (306 requisitos)
 
-- pendiente: **172**
-- verificado en demo: **101**
+- pendiente: **160**
+- verificado en demo: **113**
 - en curso: **30**
 - implementado sin verificar: **3**
 
@@ -237,18 +237,18 @@
 | CTL-07 | Eliminar revisa dependencias; en uso ofrece Desactivar; solo hijos pide confirmar cascada | J7.8 | Catálogo | Flujo eliminar → en_uso (Desactivar en su lugar) / tiene_hijos (cascada confirmada) | *.eliminar | Catalogo.test.tsx |  |  | verificado en demo |  |
 | CTL-08 | Nombres únicos por nivel sin distinguir mayúsculas | J7.8 | Catálogo | nombreRepetido sin tildes ni mayúsculas, además del error del servidor en el campo | — | Catalogo.test.tsx, logica.test.ts |  |  | verificado en demo |  |
 | CTL-09 | Medios de pago: crear con icono/color sugeridos, editar, activar/desactivar, reordenar | J7.8 | Catálogo | FormCatalogo para medios con IconColorPicker | medio.* | Catalogo.test.tsx |  |  | en curso | Sugerencia automática de icono/color por tipo pendiente |
-| SAL-01 | Calidad de datos: anillo 0–100 con 4 dimensiones y pesos; Revisar datos (incompletos, inactivos con sugerencia, duplicados) | J7.9 | Salud |  | revision.guardar |  |  |  | pendiente |  |
-| SAL-02 | Duplicados: Legítimo/Pendiente/Duplicado confirmado; confirmar ofrece anular uno | J7.9 | Salud |  | revision.guardar |  |  |  | pendiente |  |
-| SAL-03 | Mi presupuesto: disponible tras compromisos, alertas 70/90/100, cajas en riesgo | J7.9 | Salud |  | — |  |  |  | pendiente |  |
-| SAL-04 | Evolución: ranking de subidas/bajadas, Nuevo, tarjetas de ahorro potencial | J7.9 | Salud |  | — |  |  |  | pendiente |  |
-| SAL-05 | Compromisos: previsto/pagado/pendiente, estados con detalle, asociar/quitar y Registrar pago precargado | J7.9/E3 | Salud |  | compromiso.* |  |  |  | pendiente |  |
-| SAL-06 | Compromisos en lista compacta: vencidos/próximos primero, pagados contraídos | E3 | Salud |  | — |  |  |  | pendiente |  |
-| SAL-07 | Conciliación: período, fecha de corte viva, hora; comparación con diferencia con signo y % | J7.9 | Salud |  | conciliacion.verificar |  |  |  | pendiente |  |
-| SAL-08 | Grupos de fondos: una fuente solo en un grupo activo | J7.9 | Salud |  | grupoFondos.guardar |  |  |  | pendiente |  |
-| SAL-09 | Estados Pendiente/En revisión/Conciliada/Cerrada con diferencia justificada/Desactualizada | J7.9 | Salud |  | — |  |  |  | pendiente |  |
-| SAL-10 | Revisar diferencia: movimientos del período, registrar gasto olvidado con la fecha de corte, ir a Fuentes, documentar causa | J7.9 | Salud |  | conciliacion.seguimiento |  |  |  | pendiente |  |
-| SAL-11 | Historial completo; nunca crea movimientos para cuadrar; corregir agrega fila que reemplaza a la anterior | J7.9 | Salud |  | conciliaciones |  |  |  | pendiente |  |
-| SAL-12 | Cinco tarjetas-pestaña; Conciliación es la quinta | E3/J7.9 | Salud |  | — |  |  |  | pendiente |  |
+| SAL-01 | Calidad de datos: anillo 0–100 con 4 dimensiones y pesos; Revisar datos (incompletos, inactivos con sugerencia, duplicados) | J7.9 | Salud | Anillo 0–100 con 4 dimensiones y pesos (30/30/20/20); «Revisar datos» con incompletos, clasificaciones inactivas con sugerencia y duplicados | revision.guardar | Salud.test.tsx, logica.test.ts, servidor.test.ts, e2e/salud.spec.ts |  |  | verificado en demo | La sugerencia se muestra; la corrección se hace en el formulario de edición (no se aplica sola) |
+| SAL-02 | Duplicados: Legítimo/Pendiente/Duplicado confirmado; confirmar ofrece anular uno | J7.9 | Salud | Duplicados Legítimo/Pendiente/Duplicado confirmado (revision.guardar, misma fila por firma); confirmar ofrece anular uno | revision.guardar | Salud.test.tsx, logica.test.ts, servidor.test.ts, e2e/salud.spec.ts |  |  | verificado en demo |  |
+| SAL-03 | Mi presupuesto: disponible tras compromisos, alertas 70/90/100, cajas en riesgo | J7.9 | Salud | Disponible tras compromisos, umbrales de la configuración y cajas en riesgo | — | Salud.test.tsx, logica.test.ts, servidor.test.ts, e2e/salud.spec.ts |  |  | verificado en demo |  |
+| SAL-04 | Evolución: ranking de subidas/bajadas, Nuevo, tarjetas de ahorro potencial | J7.9 | Salud | Evolución por ámbito/categoría/subcategoría contra 1 o 2 meses atrás, «Nuevo» y ahorro potencial | — | Salud.test.tsx, logica.test.ts, servidor.test.ts, e2e/salud.spec.ts |  |  | verificado en demo |  |
+| SAL-05 | Compromisos: previsto/pagado/pendiente, estados con detalle, asociar/quitar y Registrar pago precargado | J7.9/E3 | Salud | Previsto/pagado/pendiente, estados con detalle, asociar, quitar y Registrar pago con formulario precargado y vinculado | compromiso.* | Salud.test.tsx, logica.test.ts, servidor.test.ts, e2e/salud.spec.ts |  |  | verificado en demo |  |
+| SAL-06 | Compromisos en lista compacta: vencidos/próximos primero, pagados contraídos | E3 | Salud | Vencidos y próximos primero; cubiertos contraídos | — | Salud.test.tsx, logica.test.ts, servidor.test.ts, e2e/salud.spec.ts |  |  | verificado en demo |  |
+| SAL-07 | Conciliación: período, fecha de corte viva, hora; comparación con diferencia con signo y % | J7.9 | Salud | Verificación con período, fecha de corte (hoy por defecto, editable), hora y diferencia con signo y % sobre el calculado | conciliacion.verificar | Salud.test.tsx, logica.test.ts, servidor.test.ts, e2e/salud.spec.ts |  |  | verificado en demo | El saldo real no admite negativos (MoneyInput) |
+| SAL-08 | Grupos de fondos: una fuente solo en un grupo activo | J7.9 | Salud | Grupos de fondos con una fuente solo en un grupo activo (cliente y servidor) | grupoFondos.guardar | Salud.test.tsx, logica.test.ts, servidor.test.ts, e2e/salud.spec.ts |  |  | verificado en demo |  |
+| SAL-09 | Estados Pendiente/En revisión/Conciliada/Cerrada con diferencia justificada/Desactualizada | J7.9 | Salud | Estados Pendiente/En revisión/Conciliada/Cerrada con diferencia justificada y Desactualizada (derivada al recalcular) | — | Salud.test.tsx, logica.test.ts, servidor.test.ts, e2e/salud.spec.ts |  |  | verificado en demo |  |
+| SAL-10 | Revisar diferencia: movimientos del período, registrar gasto olvidado con la fecha de corte, ir a Fuentes, documentar causa | J7.9 | Salud | Revisar diferencia: movimientos del período, gasto olvidado con la fecha de corte, ir a Fuentes y documentar la causa | conciliacion.seguimiento | Salud.test.tsx, logica.test.ts, servidor.test.ts, e2e/salud.spec.ts |  |  | verificado en demo |  |
+| SAL-11 | Historial completo; nunca crea movimientos para cuadrar; corregir agrega fila que reemplaza a la anterior | J7.9 | Salud | Historial completo; hoja de solo agregar; corregir agrega una fila que reemplaza a la anterior; nunca crea movimientos | conciliaciones | Salud.test.tsx, logica.test.ts, servidor.test.ts, e2e/salud.spec.ts |  |  | verificado en demo |  |
+| SAL-12 | Cinco tarjetas-pestaña; Conciliación es la quinta | E3/J7.9 | Salud | Cinco tarjetas-pestaña con resumen; Conciliación es la quinta | — | Salud.test.tsx, logica.test.ts, servidor.test.ts, e2e/salud.spec.ts |  |  | verificado en demo |  |
 | PLN-01 | Asistente Fuentes → Cajas → Gastos del mes → Resumen con estados Pendiente/En progreso/Completada/Omitida/Error | J7.10 | Prepara tu mes |  | planificacion.guardar |  |  |  | pendiente |  |
 | PLN-02 | Etapa Completada solo tras confirmación del backend y relectura; todo en segundo plano sin cambiar de pantalla | J7.10 | Prepara tu mes |  | — |  |  |  | pendiente |  |
 | PLN-03 | Resumen con conteos y totales reales; Finalizar solo guarda estado | J7.10 | Prepara tu mes |  | — |  |  |  | pendiente |  |

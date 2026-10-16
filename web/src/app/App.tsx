@@ -13,6 +13,7 @@ import { Inicio } from './pages/Inicio'
 import { Catalogo } from './pages/Catalogo'
 import { Presupuesto } from './pages/Presupuesto'
 import { Movimientos } from './pages/Movimientos'
+import { Salud } from './pages/Salud'
 import { FormMovimientoGlobal } from './movimientos/FormGlobal'
 import { GastosMesModal } from './gastosmes/GastosMesModal'
 import { UiCatalog } from './pages/UiCatalog'
@@ -53,6 +54,13 @@ function Pantalla({ path }: { path: string }) {
     return (
       <Gate modulo="Catálogo">
         <Catalogo />
+      </Gate>
+    )
+  }
+  if (path === '/salud') {
+    return (
+      <Gate modulo="Salud financiera">
+        <Salud />
       </Gate>
     )
   }

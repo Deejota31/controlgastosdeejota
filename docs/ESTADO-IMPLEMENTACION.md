@@ -36,14 +36,14 @@ Entorno de pruebas aislado: pendiente de crear por el propietario o de recibir u
 | C | Catálogo y Presupuesto | Hecha con salvedades: Catálogo (altas, edición, orden, eliminación segura, selector de icono/color de ~146 iconos) y Presupuesto (fuentes, cajas, impacto de activar/desactivar, ajuste por mes, plantillas mensuales, copiar mes) con pruebas de interfaz, de consistencia cliente=servidor y en navegador. Salvedades en la matriz (PRE-01, PRE-06, CTL-02, CTL-04, CTL-09) |
 | D | Gastos del mes y compromisos | Hecha con salvedades: plantillas de gasto, modal de registro por lote idempotente, compromisos con un solo vínculo; verificada con simulador/demo y navegador. Estados Vencido y vista de compromisos llegan con Salud financiera (Fase F) |
 | E | Dashboard y filtros globales | Hecha con salvedades: Inicio completo (resumen, 8 KPIs, acumulado, diario, donut, Top 5, cajas, jerarquía, Sankey, burbujas), filtros globales en la URL con vistas guardadas y estados vacíos; verificada con demo/simulador y navegador. Salvedades: puntero sobre Sankey/burbujas sin probar, Salud aún no consume los filtros, bundle principal 178 KB gz (objetivo ≤130 KB, se aborda con carga diferida en la Fase H) |
-| F | Salud financiera y conciliación | Pendiente |
+| F | Salud financiera y conciliación | Hecha con salvedades: cinco secciones (calidad, presupuesto, evolución, compromisos, conciliación append-only) con pruebas de interfaz, de consistencia con el simulador y en navegador. Salvedades: la sugerencia de clasificación no se aplica sola, el saldo real no admite negativos |
 | G | Planificación, recordatorios, búsqueda y Configuración | Pendiente |
 | H | Importación/exportación, mantenimiento, atajo, seguridad, a11y, PWA y rendimiento | Pendiente |
 | I | Regresión, PR, despliegue y smoke | Pendiente |
 
 ## Próximo paso
 
-Fase F: Salud financiera (5 secciones) y conciliación append-only.
+Fase G: Planificación («Prepara tu mes»), recordatorios, búsqueda ⌘K, campana y Configuración completa.
 
 ## Bloqueos conocidos
 
