@@ -1,4 +1,4 @@
-import { Download, FileSpreadsheet, Plus, Receipt, Search } from 'lucide-react'
+import { Download, FileSpreadsheet, ListChecks, Plus, Receipt, Search } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
 import { Campo, claseCampo } from '@/components/Campo'
@@ -20,6 +20,7 @@ import { useMediaQuery } from '@/lib/mediaQuery'
 import { navegar, useRuta } from '@/lib/router'
 import { useDatos } from '@/store/datos'
 import { useFormMov } from '@/store/formMov'
+import { useGastosMes } from '@/store/gastosMes'
 import { toast } from '@/store/toasts'
 import { BarraSeleccion } from '../movimientos/BarraSeleccion'
 import { consultar, nombresDe, totalesDe, type ColOrden, type Consulta, type EstadoFiltro } from '../movimientos/consulta'
@@ -63,6 +64,7 @@ export function Movimientos() {
   const base = (config['moneda_base'] || 'PEN').toUpperCase()
   const ruta = useRuta()
   const abrirForm = useFormMov((s) => s.abrir)
+  const abrirGastosMes = useGastosMes((s) => s.abrir)
   const ancho = useMediaQuery('(min-width: 768px)')
 
   const [texto, setTexto] = useState('')
@@ -227,6 +229,9 @@ export function Movimientos() {
             <input type="search" aria-label="Buscar movimientos" placeholder="Buscar por descripción, categoría o medio…" className={cn(claseCampo, 'pl-9')} value={texto} onChange={(e) => setTexto(e.target.value)} />
           </div>
           <Segmented etiqueta="Estado" value={estado} onChange={setEstado} opciones={[{ valor: 'activos', etiqueta: 'Activos' }, { valor: 'anulados', etiqueta: 'Anulados' }, { valor: 'todos', etiqueta: 'Todos' }]} />
+          <Button variante="secondary" icono={<ListChecks className="size-4" aria-hidden />} onClick={abrirGastosMes}>
+            Gastos del mes
+          </Button>
           <Button icono={<Plus className="size-4" aria-hidden />} className="max-md:hidden" onClick={() => abrirForm('nuevo')}>
             Nuevo movimiento
           </Button>

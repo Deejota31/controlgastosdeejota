@@ -114,5 +114,12 @@ export const ESTADOS = {
   'PRE-09': { e: 'verificado en demo', impl: 'FormPlantilla + DialogoAplicarPlantillas con Crear / Actualizar / Sin cambios / Omitir; la vista previa del cliente coincide con la del servidor', test: 'logica.test.ts, servidor.test.ts, Presupuesto.test.tsx' },
   'PRE-10': { e: 'verificado en demo', impl: 'Pendiente / Aplicada / No aplica este mes; reaplicar no duplica filas', test: 'servidor.test.ts, logica.test.ts' },
   'PRE-11': { e: 'verificado en demo', impl: 'DialogoCopiar: montos editables y exclusiones; no duplica ni pisa; vista previa idéntica a la del servidor', test: 'logica.test.ts, servidor.test.ts, Presupuesto.test.tsx, e2e/presupuesto.spec.ts' },
+  'GM-01': { e: 'verificado en demo', impl: 'FormPlantillaGasto: compromiso con día, clonar, revisión si la clasificación quedó inactiva', test: 'GastosMesModal.test.tsx, logica.test.ts, servidor.test.ts' },
+  'GM-02': { e: 'verificado en demo', impl: 'GastosMesModal: fecha, búsqueda, ámbito, Todas/Visibles/Limpiar, selección persistente', test: 'GastosMesModal.test.tsx, e2e/gastosmes.spec.ts' },
+  'GM-03': { e: 'verificado en demo', impl: 'Edición temporal por fila; la plantilla no cambia', test: 'GastosMesModal.test.tsx, e2e/gastosmes.spec.ts' },
+  'GM-04': { e: 'verificado en demo', impl: 'Resumen fijo con totales por moneda', test: 'GastosMesModal.test.tsx, logica.test.ts' },
+  'GM-05': { e: 'verificado en demo', impl: 'construirLote + movimientos.lote con lote_id fijo; vínculo de compromisos', test: 'servidor.test.ts, GastosMesModal.test.tsx' },
+  'GM-06': { e: 'verificado en demo', impl: 'Menú por fila: Usar, Editar, Clonar, Eliminar, Subir/Bajar', test: 'GastosMesModal.test.tsx' },
+  'GM-07': { e: 'verificado en demo', impl: 'Guardar plantilla no registra; id propio por unidad; botones en Inicio y Movimientos', test: 'GastosMesModal.test.tsx, e2e/gastosmes.spec.ts' },
   'FIN-05': { e: 'verificado en demo', impl: 'Las fuentes y cajas solo cuentan en los meses donde se aplican explícitamente', test: 'servidor.test.ts, logica.test.ts' },
 }

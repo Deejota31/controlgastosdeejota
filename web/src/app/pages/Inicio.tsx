@@ -1,8 +1,12 @@
 import { useMemo } from 'react'
+import { ListChecks, Plus } from 'lucide-react'
+import { Button } from '@/components/Button'
 import { KpiCard } from '@/components/KpiCard'
 import { aCentimos, formatoMoneda } from '@/engine/dinero'
 import { useHoy } from '@/lib/fecha'
 import { useDatos } from '@/store/datos'
+import { useFormMov } from '@/store/formMov'
+import { useGastosMes } from '@/store/gastosMes'
 
 /** Resumen mínimo con los datos reales del store; el panel completo llega con la fase de Inicio y análisis. */
 export function Inicio() {
@@ -17,10 +21,20 @@ export function Inicio() {
     const ultimos = [...activos].sort((a, b) => (a.fecha === b.fecha ? b.creado_en.localeCompare(a.creado_en) : b.fecha.localeCompare(a.fecha))).slice(0, 5)
     return { total: activos.length, delMes: delMes.length, totalMes, sinTC, ultimos }
   }, [vista.movimientos, hoy])
+  const abrirMov = useFormMov((s) => s.abrir)
+  const abrirGastosMes = useGastosMes((s) => s.abrir)
   const nombre = (id: string) => vista.subcategorias.find((s) => s.id === id)?.nombre ?? vista.categorias.find((c) => c.id === id)?.nombre ?? '—'
 
   return (
     <div className="grid gap-4">
+      <div className="flex flex-wrap gap-2">
+        <Button icono={<Plus className="size-4" aria-hidden />} onClick={() => abrirMov('nuevo')}>
+          Nuevo gasto
+        </Button>
+        <Button variante="secondary" icono={<ListChecks className="size-4" aria-hidden />} onClick={abrirGastosMes}>
+          Gastos del mes
+        </Button>
+      </div>
       <div className="grid gap-3 sm:grid-cols-3">
         <KpiCard titulo="Gastado este mes" valor={formatoMoneda(resumen.totalMes)} pie={resumen.sinTC ? `${resumen.sinTC} sin tipo de cambio (excluidos)` : undefined} />
         <KpiCard titulo="Movimientos del mes" valor={resumen.delMes} />

@@ -16,7 +16,7 @@ import { aCentimos, convertirCentimos, formatoMoneda } from '@/engine/dinero'
 import { useDatos } from '@/store/datos'
 import { toast } from '@/store/toasts'
 
-import type { ModoForm } from '@/store/formMov'
+import type { ModoForm, SemillaMov } from '@/store/formMov'
 export type { ModoForm }
 
 interface Estado {
@@ -36,20 +36,23 @@ interface Estado {
 
 type Errores = Partial<Record<keyof Estado, string>>
 
-function inicial(m: Movimiento | undefined, hoy: string, base: string, ambitoDef: string, medioDef: string): Estado {
+function inicial(m: Movimiento | undefined, hoy: string, base: string, ambitoDef: string, medioDef: string, semilla?: SemillaMov): Estado {
   if (m)
     return {
       ambito: m.ambito_id, categoria: m.categoria_id, sub: m.subcategoria_id, descripcion: m.descripcion, monto: String(m.monto), moneda: m.moneda,
       fecha: m.fecha, tipo: m.tipo_gasto, medio: m.medio_pago_id, recurrente: m.es_recurrente, url: m.comprobante_url, notas: m.notas,
     }
-  return { ambito: ambitoDef, categoria: '', sub: '', descripcion: '', monto: '', moneda: base, fecha: hoy, tipo: 'variable', medio: medioDef, recurrente: false, url: '', notas: '' }
+  return {
+    ambito: semilla?.ambito ?? ambitoDef, categoria: semilla?.categoria ?? '', sub: semilla?.sub ?? '', descripcion: semilla?.descripcion ?? '', monto: semilla?.monto ?? '',
+    moneda: semilla?.moneda ?? base, fecha: hoy, tipo: semilla?.tipo ?? 'variable', medio: semilla?.medio ?? medioDef, recurrente: semilla?.recurrente ?? false, url: '', notas: '',
+  }
 }
 
 /**
  * Formulario único de movimiento: Nuevo, Editar y Clonar comparten componente.
  * Un ID fijo por formulario abierto (un doble envío no puede crear dos movimientos).
  */
-export function FormMovimiento({ modo, movimiento, abierto, onCerrar, onGuardado }: { modo: ModoForm; movimiento?: Movimiento; abierto: boolean; onCerrar: () => void; onGuardado?: (id: string) => void }) {
+export function FormMovimiento({ modo, movimiento, semilla, abierto, onCerrar, onGuardado }: { modo: ModoForm; movimiento?: Movimiento; semilla?: SemillaMov; abierto: boolean; onCerrar: () => void; onGuardado?: (id: string) => void }) {
   const vista = useDatos((s) => s.vista)
   const config = useDatos((s) => s.config)
   const zona = useDatos((s) => s.zona)
@@ -80,7 +83,7 @@ export function FormMovimiento({ modo, movimiento, abierto, onCerrar, onGuardado
       return
     }
     idForm.current = modo === 'editar' && movimiento ? movimiento.id : nuevoId('mov')
-    const ini = inicial(movimiento, hoy, base, ambitos[0]?.id ?? '', medios[0]?.id ?? '')
+    const ini = inicial(movimiento, hoy, base, ambitos[0]?.id ?? '', medios[0]?.id ?? '', modo === 'nuevo' ? semilla : undefined)
     original.current = ini
     setE(ini)
     setErrores({})
@@ -213,8 +216,16 @@ export function FormMovimiento({ modo, movimiento, abierto, onCerrar, onGuardado
     onGuardado?.(id)
     onCerrar()
     const r = await p
-    if (r.ok) toast.ok(nombre)
-    else toast.error(`No se pudo guardar: ${r.error.message}`)
+    if (!r.ok) {
+      toast.error(`No se pudo guardar: ${r.error.message}`)
+      return
+    }
+    toast.ok(nombre)
+    // Un gasto creado desde una plantilla de compromiso queda vinculado a su pago (una sola vez por movimiento).
+    if (modo === 'nuevo' && semilla?.compromisoId) {
+      const v = await mutar('compromiso.vincular', { compromiso_id: semilla.compromisoId, movimiento_id: id, mes: e.fecha.slice(0, 7) })
+      if (!v.ok) toast.error(`El gasto se guardó, pero no se pudo vincular al compromiso: ${v.error.message}`)
+    }
   }
 
   const titulo = modo === 'editar' ? 'Editar movimiento' : modo === 'clonar' ? 'Clonar movimiento' : 'Nuevo movimiento'

@@ -6,7 +6,7 @@ import { FormMovimiento } from './FormMovimiento'
 
 /** Una única instancia del formulario para toda la app. Sin conexión no se abre (no hay dónde guardar). */
 export function FormMovimientoGlobal() {
-  const { abierto, modo, movimiento, cerrar } = useFormMov()
+  const { abierto, modo, movimiento, semilla, cerrar } = useFormMov()
   const conectado = useConexion((s) => s.modo !== 'sin-config')
   const { path } = useRuta()
   if (!conectado) return null
@@ -15,6 +15,7 @@ export function FormMovimientoGlobal() {
       abierto={abierto}
       modo={modo}
       movimiento={movimiento}
+      semilla={semilla}
       onCerrar={cerrar}
       onGuardado={(id) => {
         if (path === '/movimientos') navegar('/movimientos', { resaltar: id })

@@ -14,6 +14,7 @@ import { Catalogo } from './pages/Catalogo'
 import { Presupuesto } from './pages/Presupuesto'
 import { Movimientos } from './pages/Movimientos'
 import { FormMovimientoGlobal } from './movimientos/FormGlobal'
+import { GastosMesModal } from './gastosmes/GastosMesModal'
 import { UiCatalog } from './pages/UiCatalog'
 import { NAV_PRINCIPAL } from './nav'
 
@@ -118,6 +119,7 @@ export function App() {
         <Pantalla path={path} />
       </Layout>
       <FormMovimientoGlobal />
+      <GastosMesModal />
       <Toaster />
     </>
   )

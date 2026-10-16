@@ -6,8 +6,8 @@
 
 ## Resumen (306 requisitos)
 
-- pendiente: **194**
-- verificado en demo: **82**
+- pendiente: **187**
+- verificado en demo: **89**
 - en curso: **27**
 - implementado sin verificar: **3**
 
@@ -210,13 +210,13 @@
 | MOV-13 | Historial de cambios por movimiento (auditoría) | J7.5 | Movimientos | movimientos/Historial.tsx sobre auditoria.consultar | auditoria.consultar | Historial.test.tsx |  |  | verificado en demo |  |
 | MOV-14 | Abrir un movimiento resaltado desde Salud/Compromisos con botón Volver | J7.5 | Movimientos | Movimientos.tsx: ?resaltar=<id>&volver=<ruta> | — |  |  |  | implementado sin verificar | Sin prueba; Salud y Compromisos aún no existen |
 | MOV-15 | Tabla móvil como tarjetas de dos líneas con ⋯ como alternativa al deslizar | J5.2 | Movimientos | Movimientos.tsx: tarjetas bajo 768 px con menú ⋯ | — | Movimientos.test.tsx, e2e (móvil) |  |  | en curso | Sin gesto de deslizar |
-| GM-01 | Plantilla de gasto: datos completos, "Es compromiso" con día; "Requiere revisión" si su clasificación quedó inactiva | J7.6/E3 | Gastos del mes |  | plantilla.guardar |  |  |  | pendiente |  |
-| GM-02 | Modal ancho: fecha, búsqueda, filtro ámbito, casillas, Todas/Visibles/Limpiar | J7.6 | Gastos del mes |  | — |  |  |  | pendiente |  |
-| GM-03 | Edición en línea temporal de monto/moneda/medio sin modificar la plantilla | J7.6/E3 | Gastos del mes |  | — |  |  |  | pendiente |  |
-| GM-04 | Resumen fijo: cantidad, totales por moneda, detalle | J7.6 | Gastos del mes |  | — |  |  |  | pendiente |  |
-| GM-05 | Registrar N gastos: lote idempotente todo o nada con vínculo de compromisos | J7.6 | Gastos del mes |  | movimientos.lote |  |  |  | pendiente |  |
-| GM-06 | Acciones Usar, Editar, Clonar (sin duplicados exactos), Eliminar (vuelve al modal), Reordenar | J7.6 | Gastos del mes |  | plantilla.* |  |  |  | pendiente |  |
-| GM-07 | Guardar plantilla no registra gastos; cada unidad tiene ID propio; accesible desde Inicio y Movimientos | E3 | Gastos del mes |  | — |  |  |  | pendiente |  |
+| GM-01 | Plantilla de gasto: datos completos, "Es compromiso" con día; "Requiere revisión" si su clasificación quedó inactiva | J7.6/E3 | Gastos del mes | FormPlantillaGasto: compromiso con día, clonar, revisión si la clasificación quedó inactiva | plantilla.guardar | GastosMesModal.test.tsx, logica.test.ts, servidor.test.ts |  |  | verificado en demo |  |
+| GM-02 | Modal ancho: fecha, búsqueda, filtro ámbito, casillas, Todas/Visibles/Limpiar | J7.6 | Gastos del mes | GastosMesModal: fecha, búsqueda, ámbito, Todas/Visibles/Limpiar, selección persistente | — | GastosMesModal.test.tsx, e2e/gastosmes.spec.ts |  |  | verificado en demo |  |
+| GM-03 | Edición en línea temporal de monto/moneda/medio sin modificar la plantilla | J7.6/E3 | Gastos del mes | Edición temporal por fila; la plantilla no cambia | — | GastosMesModal.test.tsx, e2e/gastosmes.spec.ts |  |  | verificado en demo |  |
+| GM-04 | Resumen fijo: cantidad, totales por moneda, detalle | J7.6 | Gastos del mes | Resumen fijo con totales por moneda | — | GastosMesModal.test.tsx, logica.test.ts |  |  | verificado en demo |  |
+| GM-05 | Registrar N gastos: lote idempotente todo o nada con vínculo de compromisos | J7.6 | Gastos del mes | construirLote + movimientos.lote con lote_id fijo; vínculo de compromisos | movimientos.lote | servidor.test.ts, GastosMesModal.test.tsx |  |  | verificado en demo |  |
+| GM-06 | Acciones Usar, Editar, Clonar (sin duplicados exactos), Eliminar (vuelve al modal), Reordenar | J7.6 | Gastos del mes | Menú por fila: Usar, Editar, Clonar, Eliminar, Subir/Bajar | plantilla.* | GastosMesModal.test.tsx |  |  | verificado en demo |  |
+| GM-07 | Guardar plantilla no registra gastos; cada unidad tiene ID propio; accesible desde Inicio y Movimientos | E3 | Gastos del mes | Guardar plantilla no registra; id propio por unidad; botones en Inicio y Movimientos | — | GastosMesModal.test.tsx, e2e/gastosmes.spec.ts |  |  | verificado en demo |  |
 | PRE-01 | Fuentes: lista/tarjetas recordada; formulario con nombre único, monto, moneda, recurrencia, medios, principal, activa | J7.7 | Presupuesto | app/pages/Presupuesto.tsx, presupuesto/FormFuente.tsx: nombre único, monto ≥ 0, moneda, recurrencia, medios, principal, activa | fuente.guardar | Presupuesto.test.tsx, e2e/presupuesto.spec.ts |  |  | en curso | La preferencia lista/tarjetas no se recuerda (solo hay tarjetas) |
 | PRE-02 | Interruptor ON/OFF con vista previa de impacto (P y disponible antes/después) | J7.7 | Presupuesto | DialogoImpacto: presupuesto, reservado, disponible y saldo libre antes/después; no escribe hasta confirmar | fuente.guardar | logica.test.ts, Presupuesto.test.tsx, e2e/presupuesto.spec.ts |  |  | verificado en demo |  |
 | PRE-03 | Ajustar importe del mes ("solo este mes"/"desde este mes") y quitar ajuste | J7.7 | Presupuesto | DialogoAjusteMes: solo este mes / desde este mes (fuentes) y Quitar del mes | fuenteMes.* | Presupuesto.test.tsx |  |  | verificado en demo | Que «desde este mes» no altere meses anteriores se cubre por el backend (backend tests), no por una prueba de interfaz propia |
