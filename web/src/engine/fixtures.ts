@@ -43,14 +43,4 @@ export function datos(p: Partial<Omit<Hojas, 'config'>> & { config?: Record<stri
   return { ...vacias, ...resto, config: { moneda_base: 'PEN', ...config } }
 }
 
-/** PRNG determinista (mulberry32) para escenarios reproducibles. */
-export function prng(semilla: number) {
-  let a = semilla >>> 0
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0
-    let t = a
-    t = Math.imul(t ^ (t >>> 15), t | 1)
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
-  }
-}
+export { prng } from '@/demo/prng'

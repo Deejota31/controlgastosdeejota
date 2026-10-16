@@ -45,7 +45,9 @@ export function nuevoId(prefijo = 'id'): string {
 }
 
 /** Transporte HTTP hacia la Web App de Apps Script (text/plain evita el preflight de CORS). */
-export function transporteHttp(url: string, timeoutMs = 25_000): Transporte {
+const ESTADOS_TRANSITORIOS = new Set([429, 500, 502, 503, 504])
+
+export function transporteHttp(url: string, timeoutMs = 20_000): Transporte {
   return {
     async enviar(p) {
       const ctl = new AbortController()
@@ -58,6 +60,7 @@ export function transporteHttp(url: string, timeoutMs = 25_000): Transporte {
           redirect: 'follow',
           signal: ctl.signal,
         })
+        if (ESTADOS_TRANSITORIOS.has(r.status)) throw new ApiError('SERVER_ERROR', `El servidor no pudo atender la petición (HTTP ${r.status}). Se reintentará.`)
         const texto = await r.text()
         try {
           return JSON.parse(texto) as unknown
@@ -77,9 +80,16 @@ export function transporteHttp(url: string, timeoutMs = 25_000): Transporte {
 
 const esperar = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
+/** Reintentos con retroceso 1 s / 3 s / 7 s y ±20 % de variación para no sincronizar clientes. */
+const ESCALA_REINTENTO = [1, 3, 7]
+export function esperaReintento(intento: number, baseMs = 1000, azar: () => number = Math.random): number {
+  const k = ESCALA_REINTENTO[Math.min(intento, ESCALA_REINTENTO.length) - 1] ?? 7
+  return Math.round(baseMs * k * (0.8 + 0.4 * azar()))
+}
+
 export interface OpcionesLlamada {
   requestId?: string
-  /** Reintentos automáticos ante errores transitorios (por defecto 2 en lecturas, 0 en escrituras). */
+  /** Reintentos automáticos ante errores transitorios (por defecto 3 en lecturas, 0 en escrituras). */
   reintentos?: number
   esperaBaseMs?: number
 }
@@ -94,10 +104,10 @@ export function crearCliente(obtener: () => { transporte: Transporte; token: str
       const conf = obtener()
       if (!conf) throw new ApiError('AUTH', 'Aún no conectaste tu hoja de cálculo.')
       const esEscritura = op.requestId !== undefined
-      const maximo = op.reintentos ?? (esEscritura ? 0 : 2)
+      const maximo = op.reintentos ?? (esEscritura ? 0 : 3)
       let ultimo: ApiError | null = null
       for (let intento = 0; intento <= maximo; intento++) {
-        if (intento > 0) await esperar((op.esperaBaseMs ?? 400) * 2 ** (intento - 1))
+        if (intento > 0) await esperar(esperaReintento(intento, op.esperaBaseMs ?? 1000))
         try {
           const crudo = (await conf.transporte.enviar({ action, payload, token: conf.token, requestId: op.requestId })) as {
             ok?: boolean

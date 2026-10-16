@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { ApiError, crearCliente, nuevoRequestId, type Cliente } from '@/api/cliente'
 import { Cola, type ItemCola } from '@/api/cola'
+import { leerParametrosDemo } from '@/demo/parametros'
 import {
   CLAVE_HOJA, NOMBRES_HOJA, hojasVacias, validarHojas, type Hojas, type NombreHoja,
 } from '@/api/esquemas'
@@ -78,7 +79,13 @@ function upsertFilas<K extends NombreHoja>(actual: Hojas[K], nuevas: Hojas[K], c
     if (i === undefined) {
       idx.set(k, out.length)
       out.push(f)
-    } else out[i] = f
+    } else {
+      // Una lectura tardía no debe pisar una fila más nueva ya confirmada.
+      const previa = out[i] as Record<string, unknown>
+      const nueva = f as Record<string, unknown>
+      if (typeof previa['version'] === 'number' && typeof nueva['version'] === 'number' && nueva['version'] < previa['version']) continue
+      out[i] = f
+    }
   }
   return out as Hojas[K]
 }
@@ -356,7 +363,9 @@ export function crearDatos(deps: DepsDatos = {}) {
 }
 
 /** Instancia de la aplicación. */
-const app = crearDatos()
+const enDemoUrl = leerParametrosDemo() !== null
+/** En demo por URL todo vive en memoria: ni cola ni instantánea tocan los datos reales guardados. */
+const app = crearDatos(enDemoUrl ? { cola: new Cola(false), sinInstantanea: true } : {})
 export const useDatos = app.store
 export const colaApp = app.cola
 export const conectarEventosDatos = app.conectarEventos

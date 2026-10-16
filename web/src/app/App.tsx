@@ -47,6 +47,23 @@ function useSincronizacion() {
       document.removeEventListener('visibilitychange', alVolver)
     }
   }, [modo])
+  // Avisa al cerrar la pestaña si quedan cambios sin confirmar en el servidor.
+  useEffect(() => {
+    const aviso = (e: BeforeUnloadEvent) => {
+      if (useDatos.getState().pendientes.length > 0) {
+        e.preventDefault()
+        e.returnValue = ''
+      }
+    }
+    window.addEventListener('beforeunload', aviso)
+    return () => window.removeEventListener('beforeunload', aviso)
+  }, [])
+  // Despierta el script de Google (arranque en frío) mientras la persona aún no ha pedido nada.
+  const url = useConexion((s) => s.url)
+  useEffect(() => {
+    if (modo !== 'real' || !url) return
+    void fetch(url, { method: 'GET', mode: 'no-cors' }).catch(() => undefined)
+  }, [modo, url])
   useEffect(() => {
     if (modo === 'sin-config' || !(segundos > 0)) return
     const t = setInterval(() => {

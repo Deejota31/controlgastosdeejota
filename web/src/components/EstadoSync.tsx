@@ -1,3 +1,4 @@
+import { leerParametrosDemo, urlSinDemo } from '@/demo/parametros'
 import { CloudCheck, CloudOff, Loader2, FlaskConical } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useConexion } from '@/store/conexion'
@@ -44,11 +45,15 @@ export function BannerDemo() {
   return (
     <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-accent-soft px-4 py-1.5 text-center text-sm text-ink">
       <FlaskConical className="size-4 shrink-0" aria-hidden />
-      <span>Modo demostración: lo que registres vive solo en este navegador.</span>
+      <span>{leerParametrosDemo() ? 'Modo demostración: los datos viven en memoria y se pierden al recargar.' : 'Modo demostración: lo que registres vive solo en este navegador.'}</span>
       <button
         type="button"
         className="font-semibold underline underline-offset-2"
         onClick={() => {
+          if (leerParametrosDemo()) {
+            location.href = urlSinDemo()
+            return
+          }
           desconectar()
           void reiniciar()
           localStorage.removeItem('dj.demo.v1')
