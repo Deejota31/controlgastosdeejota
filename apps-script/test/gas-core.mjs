@@ -26,7 +26,13 @@ export function crearServicios(cfg) {
   const logs = []
   const errores = []
   const archivosDrive = []
-  const estado = { contiendaLock: false, cacheFalla: false }
+  // crashEn: la escritura n-ésima "mata" la ejecución (después nada más se escribe); falloEn: lanza un error y la ejecución sigue viva.
+  const estado = { contiendaLock: false, cacheFalla: false, muerto: false, crashEn: 0, falloEn: 0 }
+  const escritura = () => {
+    if (estado.muerto) throw new Error('__CRASH__ la ejecución ya terminó')
+    if (estado.crashEn > 0 && --estado.crashEn === 0) { estado.muerto = true; throw new Error('__CRASH__') }
+    if (estado.falloEn > 0 && --estado.falloEn === 0) throw new Error('Fallo simulado de escritura (cuota o servicio)')
+  }
   const entorno = { nuevaFecha: cfg.nuevaFecha }
   /* ------------------------------ Hojas ------------------------------ */
   class Rango {
@@ -43,6 +49,7 @@ export function crearServicios(cfg) {
     }
     getValue() { stats.lecturas++; return this.hoja._get(this.r, this.c) }
     setValues(m) {
+      escritura()
       stats.escrituras++
       if (m.length !== this.nr || (m[0] && m[0].length !== this.nc)) throw new Error('Las dimensiones del rango no coinciden con las de los datos')
       m.forEach((fila, i) => fila.forEach((v, j) => this.hoja._set(this.r + i, this.c + j, v)))
@@ -54,6 +61,7 @@ export function crearServicios(cfg) {
     setFontWeight() { return this } setBackground() { return this } setFontColor() { return this }
     applyRowBanding() { this.hoja.bandings.push({}); return this }
     clearContent() {
+      escritura()
       stats.escrituras++
       for (let i = 0; i < this.nr; i++) for (let j = 0; j < this.nc; j++) this.hoja._set(this.r + i, this.c + j, '', true)
       return this
@@ -84,8 +92,6 @@ export function crearServicios(cfg) {
     _set(r, c, v, limpiar = false) {
       if (r < 1 || c < 1) throw new Error('Rango fuera de los límites')
       while (this.datos.length < r) this.datos.push([])
-      if (r > this.maxFilas) this.maxFilas = r
-      if (c > this.maxCols) this.maxCols = c
       if (limpiar) { this.datos[r - 1][c - 1] = ''; return }
       const formato = this.formatos[c]
       let x = v
@@ -95,6 +101,7 @@ export function crearServicios(cfg) {
     }
     getRange(r, c, nr = 1, nc = 1) {
       if (r < 1 || c < 1 || nr < 1 || nc < 1) throw new Error('Los parámetros del rango son inválidos')
+      if (r + nr - 1 > this.maxFilas || c + nc - 1 > this.maxCols) throw new Error('Las coordenadas o dimensiones del rango están fuera de las dimensiones de la hoja.')
       return new Rango(this, r, c, nr, nc)
     }
     getLastRow() {
@@ -110,8 +117,10 @@ export function crearServicios(cfg) {
     getName() { return this.nombre }
     setFrozenRows(n) { this.congeladas = n; return this }
     setColumnWidth() { return this }
-    deleteRow(n) { stats.escrituras++; this.datos.splice(n - 1, 1); return this }
-    deleteRows(n, k) { stats.escrituras++; this.datos.splice(n - 1, k); return this }
+    deleteRow(n) { return this.deleteRows(n, 1) }
+    deleteRows(n, k) { escritura(); stats.escrituras++; this.datos.splice(n - 1, k); this.maxFilas = Math.max(1, this.maxFilas - k); return this }
+    insertRowBefore(n) { escritura(); stats.escrituras++; while (this.datos.length < n - 1) this.datos.push([]); this.datos.splice(n - 1, 0, []); this.maxFilas++; return this }
+    insertRowsAfter(n, k) { escritura(); stats.escrituras++; this.maxFilas += k; return this }
     getBandings() { return this.bandings }
     getProtections() { return this.protecciones }
     protect() {
@@ -142,8 +151,8 @@ export function crearServicios(cfg) {
   const CacheService = {
     getScriptCache: () => ({
       get: (k) => { stats.cache++; if (estado.cacheFalla) throw new Error('Cache no disponible'); return mapaCache.has(k) ? mapaCache.get(k) : null },
-      put: (k, v) => { stats.cache++; if (estado.cacheFalla) throw new Error('Cache no disponible'); if (String(v).length > 100000) throw new Error('Argumento demasiado grande: value'); mapaCache.set(k, String(v)) },
-      putAll: (o) => { stats.cache++; if (estado.cacheFalla) throw new Error('Cache no disponible'); Object.entries(o).forEach(([k, v]) => { if (String(v).length > 100000) throw new Error('Argumento demasiado grande: value'); mapaCache.set(k, String(v)) }) },
+      put: (k, v) => { stats.cache++; if (estado.muerto) throw new Error('__CRASH__'); if (estado.cacheFalla) throw new Error('Cache no disponible'); if (String(v).length > 100000) throw new Error('Argumento demasiado grande: value'); mapaCache.set(k, String(v)) },
+      putAll: (o) => { stats.cache++; if (estado.muerto) throw new Error('__CRASH__'); if (estado.cacheFalla) throw new Error('Cache no disponible'); Object.entries(o).forEach(([k, v]) => { if (String(v).length > 100000) throw new Error('Argumento demasiado grande: value'); mapaCache.set(k, String(v)) }) },
       remove: (k) => { mapaCache.delete(k) },
       removeAll: (ks) => ks.forEach((k) => mapaCache.delete(k)),
     }),
@@ -152,8 +161,8 @@ export function crearServicios(cfg) {
   const PropertiesService = {
     getScriptProperties: () => ({
       getProperty: (k) => { stats.props++; return props.has(k) ? props.get(k) : null },
-      setProperty: (k, v) => { stats.props++; props.set(k, String(v)) },
-      deleteProperty: (k) => { props.delete(k) },
+      setProperty: (k, v) => { stats.props++; if (estado.muerto) throw new Error('__CRASH__'); props.set(k, String(v)) },
+      deleteProperty: (k) => { if (estado.muerto) throw new Error('__CRASH__'); props.delete(k) },
     }),
   }
   let bloqueado = false

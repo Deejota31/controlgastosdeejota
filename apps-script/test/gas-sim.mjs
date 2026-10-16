@@ -84,8 +84,16 @@ export function crearEntorno(opciones = {}) {
     post(cuerpo) {
       vm.runInContext('CTX = null', ctx)
       const texto = typeof cuerpo === 'string' ? cuerpo : JSON.stringify(cuerpo)
-      const salida = ctx.doPost({ postData: { contents: texto } })
-      return JSON.parse(salida.getContent())
+      try {
+        const salida = ctx.doPost({ postData: { contents: texto } })
+        // Si la ejecución "murió", el cliente nunca recibe la respuesta (aunque el código siguiera corriendo en el simulador).
+        if (estado.muerto) return { ok: false, error: { code: 'RED', message: 'Ejecución interrumpida (simulada)' } }
+        return JSON.parse(salida.getContent())
+      } finally {
+        estado.muerto = false // una ejecución nueva empieza viva (el crash solo mata la actual)
+        estado.crashEn = 0
+        estado.falloEn = 0
+      }
     },
     /** Crea otro libro (por ejemplo, una hoja antigua v1) con hojas dadas como matrices; devuelve su id. */
     crearLibro(nombre, hojas) {

@@ -258,8 +258,9 @@ describe('movimientos', () => {
     e.datos('movimiento.guardar', gasto()) // calienta cachés
     e.reiniciarStats()
     e.datos('movimiento.guardar', gasto())
-    expect(e.stats.escrituras).toBeLessThanOrEqual(6)
-    expect(e.stats.lecturas).toBeLessThanOrEqual(40)
+    // fila + auditoría + generación + diario durable (preparar, deshacer×3, confirmar, limpiar): 9 hoy
+    expect(e.stats.escrituras).toBeLessThanOrEqual(10)
+    expect(e.stats.lecturas).toBeLessThanOrEqual(60)
   })
 })
 

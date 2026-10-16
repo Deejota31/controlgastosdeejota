@@ -7,7 +7,7 @@ test.describe('Conexión y demo', () => {
     await expect(page.getByLabel('URL de la aplicación web de Apps Script')).toBeFocused()
     await page.getByLabel('URL de la aplicación web de Apps Script').fill('https://example.com/nada')
     await page.getByRole('button', { name: 'Probar y conectar' }).click()
-    await expect(page.getByText('La URL debe terminar en /exec', { exact: false })).toBeVisible()
+    await expect(page.getByText('La URL debe ser de script.google.com', { exact: false })).toBeVisible()
     expect(await page.evaluate(() => localStorage.getItem('dj.conexion.v1'))).toBeNull()
   })
 

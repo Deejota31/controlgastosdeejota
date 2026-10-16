@@ -49,4 +49,9 @@ export const ESTADOS = {
   'QA-03': { e: 'verificado en demo', test: 'web/tests-backend (84 pruebas)' },
   'QA-05': { e: 'en curso', test: 'fundaciones.spec.ts, conexion.spec.ts (24 pruebas)' },
   'AUD-09': { e: 'verificado en demo', impl: 'web/src/api/url.ts; validación también en transporteHttp', test: 'web/src/api/url.test.ts (14 casos)' },
+  'IDP-02': { e: 'verificado en demo', impl: 'Code.gs: op:<requestId> en _meta con respuesta y huella (sobrevive a la caché)', test: 'web/tests-backend/durabilidad.test.mjs' },
+  'IDP-04': { e: 'verificado en demo', impl: 'Code.gs: huellaPeticion; CONFLICT campo requestId', test: 'web/tests-backend/durabilidad.test.mjs' },
+  'LOT-02': { e: 'verificado en demo', impl: 'Code.gs: diario preparar→deshacer→confirmar + recuperarSiHaceFalta', test: 'web/tests-backend/durabilidad.test.mjs', bloq: 'Atomicidad real de Google no verificada: ver docs/ESTADO-IMPLEMENTACION.md' },
+  'LOT-03': { e: 'verificado en demo', impl: 'Barrido de fallos (falloEn) y caídas (crashEn) en cada escritura', test: 'web/tests-backend/durabilidad.test.mjs' },
+  'LOT-07': { e: 'verificado en demo', impl: 'La generación y la auditoría forman parte de la operación y se revierten con ella', test: 'web/tests-backend/durabilidad.test.mjs' },
 }

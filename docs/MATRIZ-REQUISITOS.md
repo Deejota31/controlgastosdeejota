@@ -6,8 +6,8 @@
 
 ## Resumen (306 requisitos)
 
-- pendiente: **260**
-- verificado en demo: **34**
+- pendiente: **255**
+- verificado en demo: **39**
 - en curso: **11**
 - implementado sin verificar: **1**
 
@@ -46,9 +46,9 @@
 | API-07 | Un solo bootstrap al conectar (prueba reutilizada) | D2 | Conexión |  | bootstrap |  |  |  | pendiente |  |
 | API-08 | Estados diferenciados: sin config, cargando, vacío, error, offline, datos sin confirmar | D2/J5.5 | Global |  | — |  |  |  | pendiente |  |
 | IDP-01 | UUID y requestId una sola vez por operación lógica, conservados en reintentos | D3 | Cola |  | — |  |  |  | pendiente |  |
-| IDP-02 | Deduplicación persistente además de la caché de 500 | D3 | Backend |  | _operaciones |  |  |  | pendiente |  |
+| IDP-02 | Deduplicación persistente además de la caché de 500 | D3 | Backend | Code.gs: op:<requestId> en _meta con respuesta y huella (sobrevive a la caché) | _meta (op:<requestId>) | web/tests-backend/durabilidad.test.mjs |  |  | verificado en demo |  |
 | IDP-03 | Dos peticiones iguales simultáneas no crean dos filas | D3 | Backend |  | lock |  |  |  | pendiente |  |
-| IDP-04 | requestId reutilizado con payload distinto → conflicto/validación | D3 | Backend |  | — |  |  |  | pendiente |  |
+| IDP-04 | requestId reutilizado con payload distinto → conflicto/validación | D3 | Backend | Code.gs: huellaPeticion; CONFLICT campo requestId | — | web/tests-backend/durabilidad.test.mjs |  |  | verificado en demo |  |
 | IDP-05 | Respuesta perdida → "pendiente de confirmar" y reconciliación por ID/versión/contenido | D3 | Cola/Store |  | cambios |  |  |  | pendiente |  |
 | IDP-06 | Solo un rechazo definitivo revierte la proyección optimista | D3 | Store |  | — |  |  |  | pendiente |  |
 | IDP-07 | Backoff con jitter, límite de intentos; no reintenta AUTH/VALIDATION/CONFLICT/SCHEMA; clasifica HTML/redirecciones | D3 | Cliente |  | — |  |  |  | pendiente |  |
@@ -60,12 +60,12 @@
 | IDP-13 | Persistencia de la cola en IndexedDB con aviso si no hay almacenamiento | J4.1 | Cola |  | — |  |  |  | pendiente |  |
 | IDP-14 | Lecturas tardías no pisan cambios confirmados ni pendientes | J4.1 | Store |  | — |  |  |  | pendiente |  |
 | LOT-01 | Lote todo o nada observable: prevalida filas y referencias antes de mutar | D4 | Backend |  | movimientos.lote |  |  |  | pendiente |  |
-| LOT-02 | Protocolo durable de preparación/confirmación/recuperación; sin estados parciales visibles | D4 | Backend |  | _operaciones |  |  |  | pendiente |  |
-| LOT-03 | Fallos entre escrituras probados: estado visible y recuperación | D4 | Pruebas backend |  | — |  |  |  | pendiente |  |
+| LOT-02 | Protocolo durable de preparación/confirmación/recuperación; sin estados parciales visibles | D4 | Backend | Code.gs: diario preparar→deshacer→confirmar + recuperarSiHaceFalta | _meta (op:*, opu:*), OP_EN_CURSO | web/tests-backend/durabilidad.test.mjs |  |  | verificado en demo | Atomicidad real de Google no verificada: ver docs/ESTADO-IMPLEMENTACION.md |
+| LOT-03 | Fallos entre escrituras probados: estado visible y recuperación | D4 | Pruebas backend | Barrido de fallos (falloEn) y caídas (crashEn) en cada escritura | — | web/tests-backend/durabilidad.test.mjs |  |  | verificado en demo |  |
 | LOT-04 | Revalidación final de versión/referencias dentro del lock | D4 | Backend |  | lock |  |  |  | pendiente |  |
 | LOT-05 | version en todas las entidades mutables con conflicto; extensiones documentadas | D4 | Backend |  | todas |  |  |  | pendiente |  |
 | LOT-06 | Sobrescribir conflicto exige decisión explícita sobre datos actuales | D4 | UI/Backend |  | CONFLICT |  |  |  | pendiente |  |
-| LOT-07 | Caché, generación y auditoría coherentes con el commit lógico | D4 | Backend |  | auditoria, _meta |  |  |  | pendiente |  |
+| LOT-07 | Caché, generación y auditoría coherentes con el commit lógico | D4 | Backend | La generación y la auditoría forman parte de la operación y se revierten con ella | auditoria, _meta | web/tests-backend/durabilidad.test.mjs |  |  | verificado en demo |  |
 | FIN-01 | Motor único y puro en céntimos enteros con redondeo determinista; tasas con precisión decimal | D5/J6 | engine/ | web/src/engine/ | — | motor.test.ts, motor2.test.ts |  |  | verificado en demo |  |
 | FIN-02 | monto_base y tipo de cambio congelados al registrar; editar recalcula de forma explícita y auditable | D5 | Formulario |  | movimiento.guardar |  |  |  | pendiente |  |
 | FIN-03 | Cambiar una tasa de configuración no revaloriza movimientos antiguos | D5 | Configuración |  | config.guardar |  |  |  | pendiente |  |
