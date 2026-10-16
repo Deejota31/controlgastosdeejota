@@ -96,4 +96,11 @@ export const ESTADOS = {
   'PRO-04': { e: 'verificado en demo', impl: 'Cola, instantánea y coordinación separadas por entorno (hash de la URL)', test: 'web/src/api/cola.test.ts, web/src/store/datos.cola.test.ts' },
   'PRO-05': { e: 'verificado en demo', impl: 'La demo vive en memoria y no toca credenciales, colas ni IndexedDB', test: 'web/e2e/conexion.spec.ts' },
   'PRO-06': { e: 'verificado en demo', impl: 'Escaneo de credenciales en archivos versionados', test: 'web/tests-backend/barrera.test.mjs', bloq: 'Falta escaneo del bundle y de capturas' },
+  'CTL-01': { e: 'verificado en demo', impl: 'app/pages/Catalogo.tsx: contadores, buscador con resaltado sin tildes, menú Agregar', test: 'Catalogo.test.tsx, logica.test.ts' },
+  'CTL-02': { e: 'verificado en demo', impl: 'Pestañas-tarjeta con interruptor y menú; reordenar con Subir/Bajar', test: 'Catalogo.test.tsx', bloq: 'Reordenar ámbitos por arrastre con puntero no probado en navegador' },
+  'CTL-03': { e: 'verificado en demo', impl: 'Tarjetas con interruptor por ámbito, menú Editar/Subir/Bajar/Eliminar, Otros fijo al final', test: 'Catalogo.test.tsx, logica.test.ts' },
+  'CTL-04': { e: 'verificado en demo', impl: 'Chips con inactivas tachadas; Ordenar subcategorías en DragList', test: 'Catalogo.test.tsx', bloq: 'Los chips no muestran aún el icono' },
+  'CTL-07': { e: 'verificado en demo', impl: 'Flujo eliminar → en_uso (Desactivar en su lugar) / tiene_hijos (cascada confirmada)', test: 'Catalogo.test.tsx' },
+  'CTL-08': { e: 'verificado en demo', impl: 'nombreRepetido sin tildes ni mayúsculas, además del error del servidor en el campo', test: 'Catalogo.test.tsx, logica.test.ts' },
+  'CTL-09': { e: 'en curso', impl: 'FormCatalogo para medios con IconColorPicker', test: 'Catalogo.test.tsx', bloq: 'Sugerencia automática de icono/color por tipo pendiente' },
 }

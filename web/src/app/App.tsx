@@ -10,6 +10,7 @@ import { SinConexion } from './pages/SinConexion'
 import { EnConstruccion } from './pages/EnConstruccion'
 import { Configuracion } from './pages/Configuracion'
 import { Inicio } from './pages/Inicio'
+import { Catalogo } from './pages/Catalogo'
 import { Movimientos } from './pages/Movimientos'
 import { FormMovimientoGlobal } from './movimientos/FormGlobal'
 import { UiCatalog } from './pages/UiCatalog'
@@ -36,6 +37,13 @@ function Pantalla({ path }: { path: string }) {
     return (
       <Gate modulo="Movimientos">
         <Movimientos />
+      </Gate>
+    )
+  }
+  if (path === '/catalogo') {
+    return (
+      <Gate modulo="Catálogo">
+        <Catalogo />
       </Gate>
     )
   }

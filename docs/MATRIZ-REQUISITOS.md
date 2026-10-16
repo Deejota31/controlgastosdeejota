@@ -6,9 +6,9 @@
 
 ## Resumen (306 requisitos)
 
-- pendiente: **213**
-- verificado en demo: **66**
-- en curso: **24**
+- pendiente: **206**
+- verificado en demo: **72**
+- en curso: **25**
 - implementado sin verificar: **3**
 
 ## Requisitos
@@ -228,15 +228,15 @@
 | PRE-09 | Plantillas mensuales de fuentes y cajas: crear, aplicar con vista previa Crear/Actualizar/Sin cambios/Omitir; reaplicar no duplica | J7.7 | Presupuesto |  | plantilla.aplicarMes |  |  |  | pendiente |  |
 | PRE-10 | Estados Pendiente/Aplicada/No aplica este mes idempotentes | J7.7/E3 | Presupuesto |  | fuenteMes/cajaMes |  |  |  | pendiente |  |
 | PRE-11 | Copiar configuración del mes anterior con vista previa editable, sin duplicar ni sobrescribir | J7.7 | Presupuesto |  | mes.copiarDeAnterior |  |  |  | pendiente |  |
-| CTL-01 | Contadores "X activas · Y en total", buscador con resaltado, menú + Agregar (ámbito, categoría, subcategoría, medio) | J7.8 | Catálogo |  | — |  |  |  | pendiente |  |
-| CTL-02 | Ámbitos: pestañas-tarjeta con interruptor, editables y reordenables | J7.8 | Catálogo |  | ambito.* |  |  |  | pendiente |  |
-| CTL-03 | Categorías: tarjetas con interruptor, + subcategoría, menú ⋯ (Editar, Subir, Bajar, Eliminar), Otros al final | J7.8 | Catálogo |  | categoria.* |  |  |  | pendiente |  |
-| CTL-04 | Subcategorías: chips con icono, inactivas tachadas, editar y reordenar | J7.8 | Catálogo |  | subcategoria.* |  |  |  | pendiente |  |
+| CTL-01 | Contadores "X activas · Y en total", buscador con resaltado, menú + Agregar (ámbito, categoría, subcategoría, medio) | J7.8 | Catálogo | app/pages/Catalogo.tsx: contadores, buscador con resaltado sin tildes, menú Agregar | — | Catalogo.test.tsx, logica.test.ts |  |  | verificado en demo |  |
+| CTL-02 | Ámbitos: pestañas-tarjeta con interruptor, editables y reordenables | J7.8 | Catálogo | Pestañas-tarjeta con interruptor y menú; reordenar con Subir/Bajar | ambito.* | Catalogo.test.tsx |  |  | verificado en demo | Reordenar ámbitos por arrastre con puntero no probado en navegador |
+| CTL-03 | Categorías: tarjetas con interruptor, + subcategoría, menú ⋯ (Editar, Subir, Bajar, Eliminar), Otros al final | J7.8 | Catálogo | Tarjetas con interruptor por ámbito, menú Editar/Subir/Bajar/Eliminar, Otros fijo al final | categoria.* | Catalogo.test.tsx, logica.test.ts |  |  | verificado en demo |  |
+| CTL-04 | Subcategorías: chips con icono, inactivas tachadas, editar y reordenar | J7.8 | Catálogo | Chips con inactivas tachadas; Ordenar subcategorías en DragList | subcategoria.* | Catalogo.test.tsx |  |  | verificado en demo | Los chips no muestran aún el icono |
 | CTL-05 | Apariencia compartida de categoría entre ámbitos por ID global; renombrar no reescribe movimientos | J7.8 | Catálogo |  | — |  |  |  | pendiente |  |
 | CTL-06 | Desactivar un nivel oculta hijos sin cambiar su estado | J7.8 | Catálogo |  | — |  |  |  | pendiente |  |
-| CTL-07 | Eliminar revisa dependencias; en uso ofrece Desactivar; solo hijos pide confirmar cascada | J7.8 | Catálogo |  | *.eliminar |  |  |  | pendiente |  |
-| CTL-08 | Nombres únicos por nivel sin distinguir mayúsculas | J7.8 | Catálogo |  | — |  |  |  | pendiente |  |
-| CTL-09 | Medios de pago: crear con icono/color sugeridos, editar, activar/desactivar, reordenar | J7.8 | Catálogo |  | medio.* |  |  |  | pendiente |  |
+| CTL-07 | Eliminar revisa dependencias; en uso ofrece Desactivar; solo hijos pide confirmar cascada | J7.8 | Catálogo | Flujo eliminar → en_uso (Desactivar en su lugar) / tiene_hijos (cascada confirmada) | *.eliminar | Catalogo.test.tsx |  |  | verificado en demo |  |
+| CTL-08 | Nombres únicos por nivel sin distinguir mayúsculas | J7.8 | Catálogo | nombreRepetido sin tildes ni mayúsculas, además del error del servidor en el campo | — | Catalogo.test.tsx, logica.test.ts |  |  | verificado en demo |  |
+| CTL-09 | Medios de pago: crear con icono/color sugeridos, editar, activar/desactivar, reordenar | J7.8 | Catálogo | FormCatalogo para medios con IconColorPicker | medio.* | Catalogo.test.tsx |  |  | en curso | Sugerencia automática de icono/color por tipo pendiente |
 | SAL-01 | Calidad de datos: anillo 0–100 con 4 dimensiones y pesos; Revisar datos (incompletos, inactivos con sugerencia, duplicados) | J7.9 | Salud |  | revision.guardar |  |  |  | pendiente |  |
 | SAL-02 | Duplicados: Legítimo/Pendiente/Duplicado confirmado; confirmar ofrece anular uno | J7.9 | Salud |  | revision.guardar |  |  |  | pendiente |  |
 | SAL-03 | Mi presupuesto: disponible tras compromisos, alertas 70/90/100, cajas en riesgo | J7.9 | Salud |  | — |  |  |  | pendiente |  |
