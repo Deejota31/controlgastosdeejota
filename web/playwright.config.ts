@@ -5,7 +5,12 @@ export default defineConfig({
   fullyParallel: true,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
-  use: { baseURL: 'http://localhost:4173', trace: 'retain-on-failure' },
+  use: {
+    baseURL: 'http://localhost:4173',
+    trace: 'retain-on-failure',
+    // Entornos sin descarga de navegadores: PW_CHROMIUM apunta a un Chromium ya instalado.
+    ...(process.env['PW_CHROMIUM'] ? { launchOptions: { executablePath: process.env['PW_CHROMIUM'] } } : {}),
+  },
   webServer: {
     command: 'npm run build && npm run preview -- --port 4173 --strictPort',
     url: 'http://localhost:4173',

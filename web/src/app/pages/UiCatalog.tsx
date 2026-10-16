@@ -17,7 +17,7 @@ import { useUi, type Tema } from '@/store/ui'
 
 function Historia({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
-    <section className="rounded-card border border-line bg-surface p-4 shadow-1">
+    <section className="min-w-0 rounded-card border border-line bg-surface p-4 shadow-1">
       <h2 className="mb-3 text-lg font-semibold">{titulo}</h2>
       <div className="flex flex-wrap items-start gap-3">{children}</div>
     </section>
@@ -36,7 +36,7 @@ export function UiCatalog() {
   const [confirmar, setConfirmar] = useState(false)
 
   return (
-    <div className="grid gap-4">
+    <div className="grid grid-cols-1 gap-4">
       <Historia titulo="Tema">
         <Segmented<Tema>
           etiqueta="Tema"
