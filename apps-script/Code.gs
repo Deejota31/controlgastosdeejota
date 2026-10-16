@@ -23,6 +23,9 @@ var MANTENER_AUDITORIA = 2000;
 var TTL_BOOTSTRAP = 600;
 var TTL_IDEMPOTENCIA = 21600;
 var MAX_IDEMPOTENCIA = 500;
+var MAX_OPERACIONES = 3000;       // filas op:* en _meta antes de recortar
+var MANTENER_OPERACIONES = 2000;  // huellas durables que se conservan
+var TROZO_DIARIO = 40000;         // celda de Sheets: 50 000 caracteres como máximo
 var TROZO_CACHE = 90000;
 var LIMITE_PETICIONES_MIN = 300;
 var MAX_LOTE = 200;
@@ -1110,11 +1113,18 @@ function buscarPorId(nombre, id) {
   return aObjeto(e, hoja(nombre).getRange(f, 1, 1, e.ncols).getValues()[0], f);
 }
 
+/** Garantiza que la cuadrícula de la hoja llegue hasta `hasta` (Sheets no crece sola al escribir con setValues). */
+function asegurarFilas(sh, hasta) {
+  var max = sh.getMaxRows();
+  if (hasta > max) sh.insertRowsAfter(max, Math.max(hasta - max, 200));
+}
 function insertar(nombre, objs) {
   if (!objs.length) return;
   var sh = hoja(nombre), e = esq(nombre);
   var ult = Math.max(sh.getLastRow(), 1);
   var filas = objs.map(function (o) { return aFila(e, o); });
+  diarioRegistrar({ k: 'i', h: nombre, f: ult + 1, n: filas.length });
+  asegurarFilas(sh, ult + filas.length);
   sh.getRange(ult + 1, 1, filas.length, e.ncols).setValues(filas);
   for (var i = 0; i < objs.length; i++) {
     Object.defineProperty(objs[i], '_fila', { value: ult + 1 + i, enumerable: false, writable: true, configurable: true });
@@ -1127,14 +1137,21 @@ function actualizar(nombre, o) {
   var e = esq(nombre);
   var f = o._fila || numeroDeFila(nombre, o[e.clave]);
   if (!f) fallar('NOT_FOUND', 'No se encontró el registro a actualizar.');
+  if (CTX.op) diarioRegistrar({ k: 'a', h: nombre, filas: [{ f: f, v: serializarFila(hoja(nombre).getRange(f, 1, 1, e.ncols).getValues()[0]) }] });
   hoja(nombre).getRange(f, 1, 1, e.ncols).setValues([aFila(e, o)]);
   CTX.escribio = true;
 }
 function borrarFilas(nombre, objs) {
   if (!objs.length) return;
-  var sh = hoja(nombre);
-  var filas = objs.map(function (o) { return o._fila || numeroDeFila(nombre, o[esq(nombre).clave]); }).filter(Boolean);
+  var sh = hoja(nombre), e = esq(nombre);
+  var filas = objs.map(function (o) { return o._fila || numeroDeFila(nombre, o[e.clave]); }).filter(Boolean);
   filas.sort(function (a, b) { return b - a; });
+  if (CTX.op && filas.length) {
+    var min = filas[filas.length - 1], max = filas[0];
+    var antes = sh.getRange(min, 1, max - min + 1, e.ncols).getValues();
+    var previas = filas.slice().reverse().map(function (f) { return { f: f, v: serializarFila(antes[f - min]) }; });
+    diarioRegistrar({ k: 'b', h: nombre, filas: previas });
+  }
   for (var i = 0; i < filas.length; i++) sh.deleteRow(filas[i]);
   delete CTX.t[nombre];
   delete CTX.indices[nombre];
@@ -1143,7 +1160,9 @@ function borrarFilas(nombre, objs) {
 function reescribirHoja(nombre, objs) {
   var sh = hoja(nombre), e = esq(nombre);
   var ult = sh.getLastRow();
+  if (CTX.op) diarioRegistrar({ k: 'r', h: nombre, v: ult >= 2 ? sh.getRange(2, 1, ult - 1, e.ncols).getValues().map(serializarFila) : [] });
   if (ult >= 2) sh.getRange(2, 1, ult - 1, e.ncols).clearContent();
+  asegurarFilas(sh, 1 + objs.length);
   if (objs.length) sh.getRange(2, 1, objs.length, e.ncols).setValues(objs.map(function (o) { return aFila(e, o); }));
   delete CTX.t[nombre];
   delete CTX.indices[nombre];
@@ -1224,7 +1243,6 @@ function volcarAuditoria() {
   });
   insertar('auditoria', filas);
   CTX.audit = [];
-  rotarAuditoria();
 }
 /** Al superar 20 000 filas, archiva en Drive (CSV) y conserva las últimas 2 000. */
 function rotarAuditoria() {
@@ -1251,21 +1269,235 @@ function rotarAuditoria() {
   delete CTX.indices['auditoria'];
 }
 
+/* ---- Huella de la petición: mismo requestId + otros datos = CONFLICT ---- */
+function estable(v) {
+  if (v === null || v === undefined || typeof v !== 'object') return JSON.stringify(v === undefined ? null : v);
+  if (Array.isArray(v)) return '[' + v.map(estable).join(',') + ']';
+  return '{' + Object.keys(v).sort().map(function (k) { return JSON.stringify(k) + ':' + estable(v[k]); }).join(',') + '}';
+}
+function hash53(str, semilla) {
+  var h1 = 0xdeadbeef ^ semilla, h2 = 0x41c6ce57 ^ semilla;
+  for (var i = 0; i < str.length; i++) {
+    var ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507); h1 ^= Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507); h2 ^= Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
+function huellaPeticion(accion, payload) {
+  var s = accion + '|' + estable(payload);
+  return hash53(s, 1) + hash53(s, 2) + s.length.toString(36);
+}
+
+/* ---- Idempotencia: caché rápida + registro durable en `_meta` (op:<requestId>) ---- */
 function idemObtener(requestId) {
   var s = cacheSegura().get('rq:' + requestId);
   if (!s) return null;
   try { return JSON.parse(s); } catch (e) { return null; }
 }
-function idemGuardar(requestId, resp) {
+function idemGuardar(requestId, huella, resp) {
   var c = cacheSegura();
-  var s = JSON.stringify(resp);
-  if (s.length > TROZO_CACHE) s = JSON.stringify({ ok: true, data: { repetido: true, nota: 'La respuesta original era demasiado grande; relee con "cambios".' }, version: VERSION, generacion: resp.generacion });
+  var s = JSON.stringify({ h: huella, r: resp });
+  if (s.length > TROZO_CACHE) s = JSON.stringify({ h: huella, r: { ok: true, data: { repetido: true, nota: 'La respuesta original era demasiado grande; relee con "cambios".' }, version: VERSION, generacion: resp.generacion } });
   c.put('rq:' + requestId, s, TTL_IDEMPOTENCIA);
   var idx = [];
   try { idx = JSON.parse(c.get('rqidx') || '[]'); } catch (e) { idx = []; }
   idx.push(requestId);
   while (idx.length > MAX_IDEMPOTENCIA) c.remove('rq:' + idx.shift());
   c.put('rqidx', JSON.stringify(idx), TTL_IDEMPOTENCIA);
+}
+/** Repetición de una petición ya aplicada: devuelve su respuesta original o CONFLICT si los datos cambiaron. */
+function repetida(huella, previa) {
+  if (previa.h !== huella) fallar('CONFLICT', 'Este identificador de petición (requestId) ya se usó con otros datos. Genera uno nuevo.', 'requestId');
+  var r = previa.r;
+  r.repetido = true;
+  return r;
+}
+
+/* ---- Diario de operaciones: preparar → aplicar → confirmar, con deshacer persistente ----
+ * Apps Script no ofrece transacciones sobre hojas. Para que cada acción sea "todo o nada":
+ *  1) antes de la PRIMERA escritura se crea op:<id> (estado en_curso) y se marca OP_EN_CURSO;
+ *  2) antes de CADA escritura se guarda en `opu:<k>` cómo deshacerla (imagen previa de las filas);
+ *  3) la confirmación es una sola celda: op:<id> pasa a "ok" con la respuesta (punto de commit);
+ *  4) si algo falla, o si la ejecución murió, la siguiente petición deshace en orden inverso (recuperación).
+ */
+function filaMeta(clave) {
+  var sh = hoja('_meta'), ult = sh.getLastRow();
+  if (ult < 2) return 0;
+  var r = sh.getRange(2, 1, ult - 1, 1).createTextFinder(clave).matchEntireCell(true).findNext();
+  return r ? r.getRow() : 0;
+}
+/** Escribe una fila de `_meta` sin pasar por el diario (el diario no se registra a sí mismo). */
+function metaCrudo(clave, valor, fila) {
+  var sh = hoja('_meta');
+  var f = fila || filaMeta(clave);
+  if (!f) { f = Math.max(sh.getLastRow(), 1) + 1; asegurarFilas(sh, f); }
+  sh.getRange(f, 1, 1, 2).setValues([[clave, valor]]);
+  delete CTX.t['_meta'];
+  return f;
+}
+function serializarFila(fila) {
+  return fila.map(function (v) { return v instanceof Date ? { $d: v.getTime() } : v; });
+}
+function revivirFila(fila) {
+  return fila.map(function (v) { return v !== null && typeof v === 'object' && v.$d !== undefined ? new Date(v.$d) : v; });
+}
+function cabeceraOp(op, estado, extra) {
+  var o = { h: op.huella, a: op.accion, s: estado, t: op.t };
+  if (extra) Object.keys(extra).forEach(function (k) { o[k] = extra[k]; });
+  return JSON.stringify(o);
+}
+function diarioPreparar() {
+  var op = CTX.op;
+  if (op.preparada) return;
+  PropertiesService.getScriptProperties().setProperty('OP_EN_CURSO', op.rid);
+  op.filaCab = metaCrudo('op:' + op.rid, cabeceraOp(op, 'en_curso'), op.filaCab || 0);
+  op.preparada = true;
+}
+/** Guarda cómo deshacer la escritura que viene (siempre ANTES de escribir). Formato: una entrada JSON por línea. */
+function diarioRegistrar(entrada) {
+  var op = CTX.op;
+  if (!op) return;
+  diarioPreparar();
+  var linea = JSON.stringify(entrada) + '\n';
+  var desde = op.texto.length;
+  op.texto += linea;
+  op.entradas.push(entrada);
+  var n = Math.ceil(op.texto.length / TROZO_DIARIO);
+  for (var k = Math.floor(desde / TROZO_DIARIO); k < n; k++) {
+    op.filasU[k] = metaCrudo('opu:' + k, op.texto.substr(k * TROZO_DIARIO, TROZO_DIARIO), op.filasU[k] || 0);
+  }
+}
+function leerDeshacer() {
+  var txt = '';
+  for (var k = 0; k < 10000; k++) {
+    var f = filaMeta('opu:' + k);
+    if (!f) break;
+    var v = String(hoja('_meta').getRange(f, 2).getValue());
+    if (v === '') break;
+    txt += v;
+  }
+  var out = [];
+  txt.split('\n').forEach(function (l) {
+    if (!l) return;
+    try { out.push(JSON.parse(l)); } catch (e) { /* línea cortada por una caída: su escritura no llegó a ocurrir */ }
+  });
+  return out;
+}
+function limpiarDeshacer() {
+  for (var k = 0; k < 10000; k++) {
+    var f = filaMeta('opu:' + k);
+    if (!f) break;
+    var sh = hoja('_meta');
+    if (String(sh.getRange(f, 2).getValue()) === '') break;
+    sh.getRange(f, 2).setValues([['']]);
+  }
+}
+function deshacerUna(e) {
+  var sh = hoja(e.h), n = esq(e.h).ncols;
+  if (e.k === 'i') {
+    var ult = sh.getLastRow();
+    if (ult >= e.f) sh.getRange(e.f, 1, Math.min(e.n, ult - e.f + 1), n).clearContent();
+  } else if (e.k === 'a') {
+    e.filas.forEach(function (x) { sh.getRange(x.f, 1, 1, n).setValues([revivirFila(x.v)]); });
+  } else if (e.k === 'b') {
+    e.filas.forEach(function (x) {
+      if (x.f <= sh.getLastRow() && String(sh.getRange(x.f, 1).getValue()) === String(x.v[0])) return; // ya restaurada
+      if (x.f <= sh.getLastRow()) sh.insertRowBefore(x.f);
+      asegurarFilas(sh, x.f);
+      sh.getRange(x.f, 1, 1, n).setValues([revivirFila(x.v)]);
+    });
+  } else if (e.k === 'r') {
+    var u = sh.getLastRow();
+    if (u >= 2) sh.getRange(2, 1, u - 1, n).clearContent();
+    if (e.v.length) { asegurarFilas(sh, 1 + e.v.length); sh.getRange(2, 1, e.v.length, n).setValues(e.v.map(revivirFila)); }
+  }
+}
+/** Deshace las `restantes` primeras entradas en orden inverso, dejando constancia del avance (es reanudable). */
+function deshacerEntradas(entradas, restantes, rid, filaCab, base) {
+  for (var i = Math.min(restantes, entradas.length) - 1; i >= 0; i--) {
+    deshacerUna(entradas[i]);
+    metaCrudo('op:' + rid, JSON.stringify(Object.assign({}, base, { s: 'en_curso', d: i })), filaCab);
+  }
+  delete CTX.t['_meta'];
+}
+/** Revierte lo escrito por la petición en curso (error a mitad de camino). */
+function revertirOperacion(err) {
+  var op = CTX.op;
+  if (!op || !op.preparada) return;
+  var base = { h: op.huella, a: op.accion, t: op.t };
+  CTX.op = null; // las escrituras de la reversión no se registran
+  deshacerEntradas(op.entradas, op.entradas.length, op.rid, op.filaCab, base);
+  metaCrudo('op:' + op.rid, JSON.stringify(Object.assign({}, base, { s: 'revertida', d: 0, e: String(err && err.message || err).slice(0, 300) })), op.filaCab);
+  limpiarDeshacer();
+  PropertiesService.getScriptProperties().deleteProperty('OP_EN_CURSO');
+  CTX.t = {}; CTX.indices = {}; CTX.escribio = false; CTX.audit = [];
+  nuevaGeneracion();
+}
+/** Si una ejecución anterior murió a mitad de una operación, la deshace. Requiere tener el bloqueo. */
+function recuperarSiHaceFalta() {
+  var props = PropertiesService.getScriptProperties();
+  var rid = props.getProperty('OP_EN_CURSO');
+  if (!rid) return false;
+  var previo = CTX.op;
+  CTX.op = null;
+  try {
+    var f = filaMeta('op:' + rid);
+    var cab = null;
+    if (f) { try { cab = JSON.parse(String(hoja('_meta').getRange(f, 2).getValue())); } catch (e) { cab = null; } }
+    if (cab && cab.s === 'en_curso') {
+      var entradas = leerDeshacer();
+      var restantes = cab.d === undefined ? entradas.length : cab.d;
+      deshacerEntradas(entradas, restantes, rid, f, { h: cab.h, a: cab.a, t: cab.t });
+      metaCrudo('op:' + rid, JSON.stringify({ h: cab.h, a: cab.a, t: cab.t, s: 'revertida', d: 0, e: 'ejecución interrumpida: se deshizo al recuperar' }), f);
+      console.error('Operación interrumpida revertida: ' + rid + ' (' + cab.a + ')');
+    }
+    limpiarDeshacer();
+    props.deleteProperty('OP_EN_CURSO');
+    CTX.t = {}; CTX.indices = {};
+    nuevaGeneracion();
+  } finally {
+    CTX.op = previo;
+  }
+  return true;
+}
+function buscarOperacion(rid) {
+  var f = filaMeta('op:' + rid);
+  if (!f) return null;
+  try { return { fila: f, cab: JSON.parse(String(hoja('_meta').getRange(f, 2).getValue())) }; } catch (e) { return { fila: f, cab: null }; }
+}
+/** Punto de commit: una sola escritura deja la operación "ok" junto con su respuesta. */
+function diarioConfirmar(resp) {
+  var op = CTX.op;
+  if (!op || !op.preparada) return;
+  var r = resp;
+  var largo = JSON.stringify(resp);
+  if (largo.length > 30000) r = { ok: true, data: { repetido: true, nota: 'La respuesta original era demasiado grande; relee con "cambios".' }, version: VERSION, generacion: resp.generacion };
+  metaCrudo('op:' + op.rid, cabeceraOp(op, 'ok', { c: ahoraIso(), d: 0, r: r }), op.filaCab);
+  CTX.op = null;
+  try { limpiarDeshacer(); PropertiesService.getScriptProperties().deleteProperty('OP_EN_CURSO'); } catch (e) { /* queda para la recuperación */ }
+}
+/** Conserva solo las últimas MANTENER_OPERACIONES huellas cuando se supera el máximo. */
+function recortarOperaciones() {
+  var sh = hoja('_meta'), ult = sh.getLastRow();
+  if (ult - 1 <= MAX_OPERACIONES) return;
+  var claves = sh.getRange(2, 1, ult - 1, 1).getValues();
+  var ops = [];
+  for (var i = 0; i < claves.length; i++) if (String(claves[i][0]).indexOf('op:') === 0) ops.push(i + 2);
+  var sobran = ops.length - MANTENER_OPERACIONES;
+  if (sobran <= 0) return;
+  var borrar = ops.slice(0, sobran);
+  // Se borran de la última a la primera, agrupando filas contiguas.
+  var j = borrar.length - 1;
+  while (j >= 0) {
+    var fin = borrar[j], ini = fin;
+    while (j - 1 >= 0 && borrar[j - 1] === ini - 1) { j--; ini = borrar[j]; }
+    sh.deleteRows(ini, fin - ini + 1);
+    j--;
+  }
+  delete CTX.t['_meta'];
 }
 
 /* ============================ 5. SEGURIDAD ============================ */
@@ -1958,6 +2190,18 @@ function actualizarVarios(nombre, objs) {
   if (!objs.length) return;
   var e = esq(nombre), sh = hoja(nombre);
   var orden = objs.slice().sort(function (a, b) { return a._fila - b._fila; });
+  if (CTX.op) {
+    var previas = [];
+    var x = 0;
+    while (x < orden.length) {
+      var y = x;
+      while (y + 1 < orden.length && orden[y + 1]._fila === orden[y]._fila + 1) y++;
+      var vals = sh.getRange(orden[x]._fila, 1, y - x + 1, e.ncols).getValues();
+      for (var q = 0; q < vals.length; q++) previas.push({ f: orden[x]._fila + q, v: serializarFila(vals[q]) });
+      x = y + 1;
+    }
+    diarioRegistrar({ k: 'a', h: nombre, filas: previas });
+  }
   var i = 0;
   while (i < orden.length) {
     var j = i;
@@ -3077,6 +3321,25 @@ function validarConfig(clave, valor) {
     if (u.length !== 3 || u.some(function (n) { return !isFinite(n) || n <= 0 || n > 200 || Math.floor(n) !== n; }) || !(u[0] < u[1] && u[1] <= u[2])) invalido('valor', 'Usa tres umbrales crecientes (ej. 70,90,100).');
     return u.join(',');
   }
+  if (clave === 'vistas_filtros') {
+    var arr;
+    try { arr = v ? JSON.parse(v) : []; } catch (e2) { arr = null; }
+    if (!Array.isArray(arr)) invalido('valor', 'Las vistas guardadas deben ser una lista.');
+    if (arr.length > 20) invalido('valor', 'Puedes guardar hasta 20 vistas.');
+    var nombresVistas = {};
+    var limpias = arr.map(function (x) {
+      if (!esObjeto(x) || typeof x.id !== 'string' || !/^[A-Za-z0-9_-]{1,64}$/.test(x.id)) invalido('valor', 'Vista con identificador no válido.');
+      var nom = typeof x.nombre === 'string' ? x.nombre.trim() : '';
+      if (!nom || nom.length > 40) invalido('valor', 'El nombre de la vista debe tener entre 1 y 40 caracteres.');
+      if (/^[=+\-@]/.test(nom)) invalido('valor', 'El nombre de la vista no puede empezar por = + - @.');
+      var kn = nom.toLowerCase();
+      if (nombresVistas[kn]) invalido('valor', 'Ya existe una vista con el nombre "' + nom + '".');
+      nombresVistas[kn] = true;
+      if (typeof x.query !== 'string' || x.query.length > 600 || !/^[A-Za-z0-9_=&,.\-]*$/.test(x.query)) invalido('valor', 'Los filtros de la vista no son válidos.');
+      return { id: x.id, nombre: nom, query: x.query };
+    });
+    return JSON.stringify(limpias);
+  }
   if (clave === 'ahorro_simulado_pct') {
     var n = Number(v);
     if (!isFinite(n) || n < 0 || n > 100) invalido('valor', 'El porcentaje debe estar entre 0 y 100.');
@@ -3733,40 +3996,60 @@ function procesar(req) {
     nuevoCtx(tipoToken === 'atajo' ? 'atajo' : 'web');
     CTX.requestId = typeof req.requestId === 'string' ? req.requestId : '';
     if (!def.escribe) {
+      if (PropertiesService.getScriptProperties().getProperty('OP_EN_CURSO')) recuperarConBloqueo();
       var data = def.fn(payload);
       return { ok: true, data: data, ms: Date.now() - t0, version: VERSION, generacion: generacion() };
     }
     var rid = req.requestId;
     if (typeof rid !== 'string' || !/^[A-Za-z0-9_-]{8,64}$/.test(rid)) invalido('requestId', 'Falta el identificador de la petición (requestId).');
+    var huella = huellaPeticion(accion, payload);
     var previa = idemObtener(rid);
-    if (previa) { previa.repetido = true; return previa; }
+    if (previa) return repetida(huella, previa);
     var lock = LockService.getScriptLock();
     try { lock.waitLock(10000); } catch (e) { fallar('BUSY', 'El sistema está ocupado. Reintenta en unos segundos.'); }
     try {
+      recuperarSiHaceFalta();
       previa = idemObtener(rid);
-      if (previa) { previa.repetido = true; return previa; }
-      var resultado;
+      if (previa) return repetida(huella, previa);
+      var dur = buscarOperacion(rid);
+      if (dur && dur.cab && dur.cab.s === 'ok') {
+        var guardada = { h: dur.cab.h, r: dur.cab.r };
+        idemGuardar(rid, guardada.h, guardada.r);
+        return repetida(huella, guardada);
+      }
+      CTX.op = { rid: rid, huella: huella, accion: accion, t: ahoraIso(), entradas: [], texto: '', filasU: [], preparada: false, filaCab: dur ? dur.fila : 0 };
+      var resultado, gen, resp;
       try {
         resultado = def.fn(payload);
         volcarAuditoria();
+        gen = CTX.escribio ? nuevaGeneracion() : generacion();
+        resp = { ok: true, data: resultado, ms: Date.now() - t0, version: VERSION, generacion: gen };
+        diarioConfirmar(resp); // punto de commit: si falla, se revierte y el cliente recibe un error
       } catch (err) {
-        if (CTX && CTX.escribio) {
-          // Escritura parcial: se invalida la caché para que los clientes relean el estado real.
-          console.error('Escritura parcial en ' + accion + ': ' + (err && err.message));
-          try { volcarAuditoria(); nuevaGeneracion(); } catch (e2) { /* sin más */ }
+        if (CTX.op && CTX.op.preparada) {
+          try { revertirOperacion(err); } catch (e2) {
+            // Si ni la reversión pudo completarse, OP_EN_CURSO sigue marcado: la próxima petición la termina.
+            console.error('No se pudo revertir ' + accion + ': ' + (e2 && e2.message));
+          }
         }
         throw err;
       }
-      var gen = CTX.escribio ? nuevaGeneracion() : generacion();
-      var resp = { ok: true, data: resultado, ms: Date.now() - t0, version: VERSION, generacion: gen };
-      idemGuardar(rid, resp);
+      try { idemGuardar(rid, huella, resp); } catch (e3) { /* la caché es opcional: queda el registro durable */ }
+      try { rotarAuditoria(); recortarOperaciones(); } catch (e4) { console.error('Mantenimiento posterior: ' + (e4 && e4.message)); }
       return resp;
     } finally {
+      CTX.op = null;
       lock.releaseLock();
     }
   } catch (err) {
     return respuestaError(err, t0, esAuth || (err instanceof ApiError && err.code === 'AUTH'));
   }
+}
+/** Las lecturas no bloquean, salvo que una ejecución anterior haya muerto a mitad de una operación. */
+function recuperarConBloqueo() {
+  var lock = LockService.getScriptLock();
+  try { lock.waitLock(10000); } catch (e) { fallar('BUSY', 'El sistema está terminando de recuperar una operación interrumpida. Reintenta en unos segundos.'); }
+  try { recuperarSiHaceFalta(); } finally { lock.releaseLock(); }
 }
 
 function salidaJson(obj) {

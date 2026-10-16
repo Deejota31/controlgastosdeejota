@@ -24,6 +24,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run sync:check
+      - run: npm run docs:check
 
   types:
     runs-on: ubuntu-latest

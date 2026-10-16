@@ -2,6 +2,13 @@ import { Plus, Trash2, Wallet } from 'lucide-react'
 import { useState, type ReactNode } from 'react'
 import { Button, IconButton } from '@/components/Button'
 import { Checkbox, Radio } from '@/components/Checkbox'
+import { ChipSelect } from '@/components/ChipSelect'
+import { Combobox } from '@/components/Combobox'
+import { DragList } from '@/components/DragList'
+import { MenuAcciones } from '@/components/MenuAcciones'
+import { MoneyInput, parsearMonto } from '@/components/MoneyInput'
+import { MultiSelect } from '@/components/MultiSelect'
+import { Pagination } from '@/components/Pagination'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { EmptyState, ErrorState } from '@/components/EmptyState'
 import { KpiCard, StatRow } from '@/components/KpiCard'
@@ -34,6 +41,18 @@ export function UiCatalog() {
   const [tab, setTab] = useState('uno')
   const [modal, setModal] = useState(false)
   const [confirmar, setConfirmar] = useState(false)
+  const [combo, setCombo] = useState('')
+  const [multi, setMulti] = useState<string[]>(['b'])
+  const [monto, setMonto] = useState('1,234.50')
+  const [chip, setChip] = useState('x')
+  const [pag, setPag] = useState({ p: 2, t: 25 })
+  const [orden, setOrden] = useState(['Café', 'Almuerzo', 'Bus', 'Luz'])
+  const opciones = [
+    { valor: 'a', etiqueta: 'Alimentación' },
+    { valor: 'b', etiqueta: 'Transporte' },
+    { valor: 'c', etiqueta: 'Servicios' },
+    { valor: 'd', etiqueta: 'Salud' },
+  ]
 
   return (
     <div className="grid grid-cols-1 gap-4">
@@ -82,6 +101,37 @@ export function UiCatalog() {
             { valor: 'anio', etiqueta: 'Año' },
           ]}
         />
+      </Historia>
+      <Historia titulo="Combobox / MultiSelect / ChipSelect">
+        <div className="grid w-full gap-3 md:grid-cols-3">
+          <Combobox etiqueta="Categoría" opciones={opciones} valor={combo} onChange={setCombo} placeholder="Buscar categoría…" />
+          <MultiSelect etiqueta="Categorías" opciones={opciones} valor={multi} onChange={setMulti} placeholder="Todas" />
+          <ChipSelect etiqueta="Ámbito" opciones={[{ valor: 'x', etiqueta: 'Personal' }, { valor: 'y', etiqueta: 'Hogar' }]} valor={chip} onChange={setChip} />
+        </div>
+      </Historia>
+      <Historia titulo="MoneyInput">
+        <div className="w-full max-w-xs">
+          <MoneyInput etiqueta="Monto" moneda="S/" valor={monto} onChange={setMonto} />
+          <p className="num mt-1 text-sm text-muted">Valor numérico: {String(parsearMonto(monto))}</p>
+        </div>
+      </Historia>
+      <Historia titulo="MenuAcciones / Pagination">
+        <MenuAcciones
+          etiqueta="Acciones de ejemplo"
+          acciones={[
+            { id: 'e', etiqueta: 'Editar', onSelect: () => toast.info('Editar') },
+            { id: 'c', etiqueta: 'Clonar', onSelect: () => toast.info('Clonar') },
+            { id: 'a', etiqueta: 'Anular', peligro: true, onSelect: () => toast.info('Anular') },
+          ]}
+        />
+        <div className="w-full">
+          <Pagination pagina={pag.p} paginas={Math.ceil(240 / pag.t)} total={240} tamano={pag.t} onPagina={(p) => setPag({ ...pag, p })} onTamano={(t) => setPag({ p: 1, t })} />
+        </div>
+      </Historia>
+      <Historia titulo="DragList (ratón, toque y teclado)">
+        <div className="w-full max-w-md">
+          <DragList etiqueta="Orden de ejemplo" items={orden} id={(t) => t} nombre={(t) => t} render={(t) => <span className="font-medium">{t}</span>} onReordenar={setOrden} />
+        </div>
       </Historia>
       <Historia titulo="Tabs">
         <div className="w-full">

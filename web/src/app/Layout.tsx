@@ -4,7 +4,9 @@ import { IconButton } from '@/components/Button'
 import { BannerDemo, EstadoSync } from '@/components/EstadoSync'
 import { Logo } from '@/components/Logo'
 import { cn } from '@/lib/cn'
+import { enlaceConFiltros } from '@/lib/filtros'
 import { navegar, useRuta } from '@/lib/router'
+import { useFormMov } from '@/store/formMov'
 import { useUi } from '@/store/ui'
 import { NAV_MOVIL, NAV_PRINCIPAL, tituloDe, type ItemNav } from './nav'
 
@@ -13,12 +15,12 @@ function activo(path: string, actual: string) {
 }
 
 function NavLink({ item, mini, onClick }: { item: ItemNav; mini?: boolean; onClick?: () => void }) {
-  const { path: actual } = useRuta()
+  const { path: actual, params } = useRuta()
   const on = activo(item.path, actual)
   const Icon = item.icono
   return (
     <a
-      href={`#${item.path}`}
+      href={enlaceConFiltros(item.path, params)}
       onClick={onClick}
       aria-current={on ? 'page' : undefined}
       title={mini ? item.etiqueta : undefined}
@@ -140,12 +142,12 @@ function BottomNav() {
 }
 
 function NavTab({ item }: { item: ItemNav }) {
-  const { path: actual } = useRuta()
+  const { path: actual, params } = useRuta()
   const on = activo(item.path, actual)
   const Icon = item.icono
   return (
     <a
-      href={`#${item.path}`}
+      href={enlaceConFiltros(item.path, params)}
       aria-current={on ? 'page' : undefined}
       className={cn(
         'flex min-h-[var(--bottombar-h)] flex-col items-center justify-center gap-0.5 text-xs font-medium',
@@ -159,9 +161,11 @@ function NavTab({ item }: { item: ItemNav }) {
 }
 
 function Fab() {
+  const abrir = useFormMov((s) => s.abrir)
   return (
     <button
       type="button"
+      onClick={() => abrir('nuevo')}
       aria-label="Nuevo gasto"
       className="fixed right-4 bottom-[calc(var(--bottombar-h)+var(--safe-bottom)+16px)] z-30 flex size-14 items-center justify-center rounded-full bg-accent text-white shadow-2 transition-transform duration-150 active:scale-95 md:hidden"
     >

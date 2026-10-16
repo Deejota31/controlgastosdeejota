@@ -12,29 +12,37 @@ function leer(): Ruta {
 }
 
 let cache: Ruta = typeof window === 'undefined' ? { path: '/', params: new URLSearchParams() } : leer()
-let firma = ''
+let firma = typeof window === 'undefined' ? '/?' : cache.path + '?' + cache.params.toString()
+
+/** Instantánea estable: solo cambia de identidad cuando cambia la URL (también si cambió mientras nadie escuchaba). */
+function instantanea(): Ruta {
+  if (typeof window === 'undefined') return cache
+  const nueva = leer()
+  const f = nueva.path + '?' + nueva.params.toString()
+  if (f !== firma) {
+    firma = f
+    cache = nueva
+  }
+  return cache
+}
 
 function suscribir(cb: () => void) {
-  const handler = () => {
-    const nueva = leer()
-    const f = nueva.path + '?' + nueva.params.toString()
-    if (f !== firma) {
-      firma = f
-      cache = nueva
-    }
-    cb()
-  }
-  window.addEventListener('hashchange', handler)
-  return () => window.removeEventListener('hashchange', handler)
+  window.addEventListener('hashchange', cb)
+  return () => window.removeEventListener('hashchange', cb)
 }
 
 export function useRuta(): Ruta {
-  return useSyncExternalStore(suscribir, () => cache, () => cache)
+  return useSyncExternalStore(suscribir, instantanea, instantanea)
 }
 
-export function navegar(path: string, params?: Record<string, string | undefined>) {
+export function navegar(path: string, params?: Record<string, string | undefined>, opciones: { reemplazar?: boolean } = {}) {
   const q = new URLSearchParams()
   if (params) for (const [k, v] of Object.entries(params)) if (v) q.set(k, v)
   const s = q.toString()
-  window.location.hash = s ? `${path}?${s}` : path
+  const destino = s ? `${path}?${s}` : path
+  if (opciones.reemplazar) {
+    // replaceState no dispara hashchange: se avisa a mano para que los suscriptores relean la URL.
+    window.history.replaceState(null, '', `#${destino}`)
+    window.dispatchEvent(new HashChangeEvent('hashchange'))
+  } else window.location.hash = destino
 }

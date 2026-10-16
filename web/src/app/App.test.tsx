@@ -2,6 +2,7 @@ import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { crearBackendDemo } from '@/demo/backend-demo'
+import { navegador } from '@/lib/navegador'
 import { useConexion } from '@/store/conexion'
 import { useDatos } from '@/store/datos'
 import { Toaster } from '@/components/Toaster'
@@ -40,24 +41,21 @@ describe('App (fundaciones)', () => {
   })
 })
 
-describe('App con conexión (modo demo = Code.gs real)', () => {
-  it('"Probar en modo demo" carga los datos, muestra el aviso de demo y "Al día"', async () => {
+describe('Probar en modo demo', () => {
+  it('abre la demo en memoria (?demo) en vez de guardarla en el navegador', async () => {
     localStorage.clear()
+    const irA = vi.spyOn(navegador, 'irA').mockImplementation(() => undefined)
     render(<App />)
     await act(async () => {
       window.location.hash = '#/'
       window.dispatchEvent(new HashChangeEvent('hashchange'))
     })
     await userEvent.click(await screen.findByRole('button', { name: 'Probar en modo demo' }))
-    expect(await screen.findByText(/Estás en modo demo/)).toBeInTheDocument()
-    expect(await screen.findByText('Movimientos en total')).toBeInTheDocument()
-    expect(await screen.findByText('Al día', {}, { timeout: 5000 })).toBeInTheDocument()
-    expect(useDatos.getState().vista.ambitos).toHaveLength(5)
-    // Salir de la demo vuelve al onboarding y borra los datos locales
-    await userEvent.click(screen.getByRole('button', { name: 'Salir de la demo' }))
-    expect(await screen.findByRole('heading', { name: 'Conecta tu hoja para empezar' })).toBeInTheDocument()
-    expect(useConexion.getState().modo).toBe('sin-config')
+    expect(irA).toHaveBeenCalledTimes(1)
+    expect(irA.mock.calls[0]![0]).toMatch(/\?demo#\/$/)
+    expect(localStorage.getItem('dj.conexion.v1')).toBeNull()
     expect(localStorage.getItem('dj.demo.v1')).toBeNull()
+    irA.mockRestore()
   })
 })
 
@@ -112,7 +110,7 @@ describe('Conectar mi hoja', () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('red caída')))
     render(<App />)
     await irA('#/configuracion')
-    await userEvent.type(await screen.findByLabelText('URL de la aplicación web de Apps Script'), 'https://script.google.com/macros/s/AKfyc123456/exec')
+    await userEvent.type(await screen.findByLabelText('URL de la aplicación web de Apps Script'), 'https://script.google.com/macros/s/AKfycbxAbCdEfGhIjKlMnOpQrStUv/exec')
     await userEvent.type(screen.getByLabelText('Token de acceso'), 'tok')
     await userEvent.click(screen.getByRole('button', { name: 'Probar y conectar' }))
     expect(await screen.findByRole('alert')).toHaveTextContent(/No hay conexión/)
@@ -123,15 +121,22 @@ describe('Conectar mi hoja', () => {
   it('con URL y token correctos conecta, guarda y lleva a Inicio con datos', async () => {
     const mem = new Map<string, string>()
     const backend = await crearBackendDemo({ almacen: { getItem: (k) => mem.get(k) ?? null, setItem: (k, v) => void mem.set(k, v), removeItem: (k) => void mem.delete(k) } })
-    vi.stubGlobal('fetch', vi.fn(async (_u: string, init: RequestInit) => new Response(JSON.stringify(await backend.enviar(JSON.parse(String(init.body)))))))
+    const acciones: string[] = []
+    vi.stubGlobal('fetch', vi.fn(async (_u: string, init: RequestInit) => {
+      const cuerpo = JSON.parse(String(init.body)) as { action: string }
+      acciones.push(cuerpo.action)
+      return new Response(JSON.stringify(await backend.enviar(cuerpo as never)))
+    }))
     render(<App />)
     await irA('#/configuracion')
-    await userEvent.type(await screen.findByLabelText('URL de la aplicación web de Apps Script'), 'https://script.google.com/macros/s/AKfyc123456/exec')
+    await userEvent.type(await screen.findByLabelText('URL de la aplicación web de Apps Script'), 'https://script.google.com/macros/s/AKfycbxAbCdEfGhIjKlMnOpQrStUv/exec')
     await userEvent.type(screen.getByLabelText('Token de acceso'), backend.token)
     await userEvent.click(screen.getByRole('button', { name: 'Probar y conectar' }))
-    expect(await screen.findByText('Movimientos en total', {}, { timeout: 8000 })).toBeInTheDocument()
+    expect(await screen.findByText('Ticket promedio', {}, { timeout: 8000 })).toBeInTheDocument()
     expect(useConexion.getState().modo).toBe('real')
     expect(JSON.parse(localStorage.getItem('dj.conexion.v1')!).url).toContain('/exec')
     expect(window.location.hash).toBe('#/')
+    // Un solo bootstrap al conectar: el de la prueba se reutiliza (el resto son lecturas incrementales).
+    expect(acciones.filter((a) => a === 'bootstrap')).toHaveLength(1)
   })
 })

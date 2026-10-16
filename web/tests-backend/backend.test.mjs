@@ -258,8 +258,9 @@ describe('movimientos', () => {
     e.datos('movimiento.guardar', gasto()) // calienta cachés
     e.reiniciarStats()
     e.datos('movimiento.guardar', gasto())
-    expect(e.stats.escrituras).toBeLessThanOrEqual(6)
-    expect(e.stats.lecturas).toBeLessThanOrEqual(40)
+    // fila + auditoría + generación + diario durable (preparar, deshacer×3, confirmar, limpiar): 9 hoy
+    expect(e.stats.escrituras).toBeLessThanOrEqual(10)
+    expect(e.stats.lecturas).toBeLessThanOrEqual(60)
   })
 })
 
@@ -381,6 +382,14 @@ describe('configuración', () => {
   it('acepta solo claves de la lista blanca', () => {
     expect(e.llamar('config.guardar', { items: [{ clave: 'cualquier_cosa', valor: 'x' }] }).ok).toBe(false)
     expect(e.llamar('config.guardar', { items: [{ clave: 'tema', valor: 'oscuro' }] }).ok).toBe(true)
+  })
+  it('guarda vistas de filtros validadas y rechaza nombres repetidos, fórmulas y consultas con símbolos', () => {
+    const v = (arr) => e.llamar('config.guardar', { items: [{ clave: 'vistas_filtros', valor: JSON.stringify(arr) }] })
+    expect(v([{ id: 'v1', nombre: 'Solo comida', query: 'p=ultimos_3&a=amb-1' }]).ok).toBe(true)
+    expect(v([{ id: 'v1', nombre: 'A', query: 'p=x' }, { id: 'v2', nombre: 'a', query: 'p=y' }]).ok).toBe(false)
+    expect(v([{ id: 'v1', nombre: '=SUMA(1)', query: 'p=x' }]).ok).toBe(false)
+    expect(v([{ id: 'v1', nombre: 'Ok', query: 'p=<script>' }]).ok).toBe(false)
+    expect(v(Array.from({ length: 21 }, (_, i) => ({ id: 'v' + i, nombre: 'N' + i, query: 'p=x' }))).ok).toBe(false)
   })
   it('valida las monedas y no inventa tipos de cambio', () => {
     expect(e.llamar('movimiento.guardar', gasto({ moneda: 'USD' })).ok).toBe(false)

@@ -30,3 +30,10 @@ export function urlSinDemo(href: string = location.href): string {
   for (const k of ['demo', 'latencia', 'falla', 'vacio']) u.searchParams.delete(k)
   return u.pathname + (u.searchParams.size ? `?${u.searchParams}` : '') + u.hash
 }
+
+/** Dirección de la demo: la misma página con ?demo. Es la única forma de entrar a la demo (siempre en memoria). */
+export function urlConDemo(href: string = location.href): string {
+  const u = new URL(href)
+  u.searchParams.set('demo', '')
+  return u.pathname + `?${u.searchParams.toString().replace(/(^|&)demo=(?=&|$)/, '$1demo')}` + '#/'
+}

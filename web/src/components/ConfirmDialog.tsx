@@ -10,11 +10,13 @@ export interface ConfirmDialogProps {
   confirmar: string
   peligro?: boolean
   loading?: boolean
+  /** Bloquea el botón de confirmar (por ejemplo, falta elegir un dato). */
+  confirmarDeshabilitado?: boolean
   onConfirmar: () => void
   onCancelar: () => void
 }
 
-export function ConfirmDialog({ abierto, titulo, impacto, confirmar, peligro, loading, onConfirmar, onCancelar }: ConfirmDialogProps) {
+export function ConfirmDialog({ abierto, titulo, impacto, confirmar, peligro, loading, confirmarDeshabilitado, onConfirmar, onCancelar }: ConfirmDialogProps) {
   return (
     <Modal
       abierto={abierto}
@@ -25,7 +27,7 @@ export function ConfirmDialog({ abierto, titulo, impacto, confirmar, peligro, lo
           <Button variante="secondary" onClick={onCancelar}>
             Cancelar
           </Button>
-          <Button variante={peligro ? 'danger' : 'primary'} loading={loading} onClick={onConfirmar}>
+          <Button variante={peligro ? 'danger' : 'primary'} loading={loading} disabled={confirmarDeshabilitado} onClick={onConfirmar}>
             {confirmar}
           </Button>
         </>

@@ -10,6 +10,12 @@ import { SinConexion } from './pages/SinConexion'
 import { EnConstruccion } from './pages/EnConstruccion'
 import { Configuracion } from './pages/Configuracion'
 import { Inicio } from './pages/Inicio'
+import { Catalogo } from './pages/Catalogo'
+import { Presupuesto } from './pages/Presupuesto'
+import { Movimientos } from './pages/Movimientos'
+import { Salud } from './pages/Salud'
+import { FormMovimientoGlobal } from './movimientos/FormGlobal'
+import { GastosMesModal } from './gastosmes/GastosMesModal'
 import { UiCatalog } from './pages/UiCatalog'
 import { NAV_PRINCIPAL } from './nav'
 
@@ -27,6 +33,34 @@ function Pantalla({ path }: { path: string }) {
     return (
       <Gate modulo="Inicio">
         <Inicio />
+      </Gate>
+    )
+  }
+  if (path === '/movimientos') {
+    return (
+      <Gate modulo="Movimientos">
+        <Movimientos />
+      </Gate>
+    )
+  }
+  if (path === '/presupuesto') {
+    return (
+      <Gate modulo="Presupuesto">
+        <Presupuesto />
+      </Gate>
+    )
+  }
+  if (path === '/catalogo') {
+    return (
+      <Gate modulo="Catálogo">
+        <Catalogo />
+      </Gate>
+    )
+  }
+  if (path === '/salud') {
+    return (
+      <Gate modulo="Salud financiera">
+        <Salud />
       </Gate>
     )
   }
@@ -92,6 +126,8 @@ export function App() {
       <Layout>
         <Pantalla path={path} />
       </Layout>
+      <FormMovimientoGlobal />
+      <GastosMesModal />
       <Toaster />
     </>
   )
