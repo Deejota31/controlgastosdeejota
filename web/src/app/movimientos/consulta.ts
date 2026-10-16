@@ -14,6 +14,9 @@ export interface Consulta {
   ambitos: string[]
   categorias: string[]
   medios: string[]
+  subcategorias?: string[]
+  tipos?: string[]
+  recurrente?: 'todos' | 'si' | 'no'
   orden: ColOrden
   dir: 'asc' | 'desc'
 }
@@ -43,6 +46,8 @@ export function consultar(v: Vista, q: Consulta, n: Nombres): Movimiento[] {
   const amb = q.ambitos.length ? new Set(q.ambitos) : null
   const cat = q.categorias.length ? new Set(q.categorias) : null
   const med = q.medios.length ? new Set(q.medios) : null
+  const sub = q.subcategorias?.length ? new Set(q.subcategorias) : null
+  const tip = q.tipos?.length ? new Set(q.tipos) : null
   const out = v.movimientos.filter((m) => {
     if (q.estado === 'activos' && m.estado !== 'activo') return false
     if (q.estado === 'anulados' && m.estado !== 'anulado') return false
@@ -51,6 +56,10 @@ export function consultar(v: Vista, q: Consulta, n: Nombres): Movimiento[] {
     if (amb && !amb.has(m.ambito_id)) return false
     if (cat && !cat.has(m.categoria_id)) return false
     if (med && !med.has(m.medio_pago_id)) return false
+    if (sub && !sub.has(m.subcategoria_id)) return false
+    if (tip && !tip.has(m.tipo_gasto)) return false
+    if (q.recurrente === 'si' && !m.es_recurrente) return false
+    if (q.recurrente === 'no' && m.es_recurrente) return false
     if (texto) {
       const pajar = normalizarBusqueda(`${m.descripcion} ${m.notas} ${n.categoria(m.categoria_id)} ${n.sub(m.subcategoria_id)} ${n.medio(m.medio_pago_id)}`)
       if (!pajar.includes(texto)) return false

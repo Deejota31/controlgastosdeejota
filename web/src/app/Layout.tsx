@@ -4,6 +4,7 @@ import { IconButton } from '@/components/Button'
 import { BannerDemo, EstadoSync } from '@/components/EstadoSync'
 import { Logo } from '@/components/Logo'
 import { cn } from '@/lib/cn'
+import { enlaceConFiltros } from '@/lib/filtros'
 import { navegar, useRuta } from '@/lib/router'
 import { useFormMov } from '@/store/formMov'
 import { useUi } from '@/store/ui'
@@ -14,12 +15,12 @@ function activo(path: string, actual: string) {
 }
 
 function NavLink({ item, mini, onClick }: { item: ItemNav; mini?: boolean; onClick?: () => void }) {
-  const { path: actual } = useRuta()
+  const { path: actual, params } = useRuta()
   const on = activo(item.path, actual)
   const Icon = item.icono
   return (
     <a
-      href={`#${item.path}`}
+      href={enlaceConFiltros(item.path, params)}
       onClick={onClick}
       aria-current={on ? 'page' : undefined}
       title={mini ? item.etiqueta : undefined}
@@ -141,12 +142,12 @@ function BottomNav() {
 }
 
 function NavTab({ item }: { item: ItemNav }) {
-  const { path: actual } = useRuta()
+  const { path: actual, params } = useRuta()
   const on = activo(item.path, actual)
   const Icon = item.icono
   return (
     <a
-      href={`#${item.path}`}
+      href={enlaceConFiltros(item.path, params)}
       aria-current={on ? 'page' : undefined}
       className={cn(
         'flex min-h-[var(--bottombar-h)] flex-col items-center justify-center gap-0.5 text-xs font-medium',

@@ -35,7 +35,7 @@ Entorno de pruebas aislado: pendiente de crear por el propietario o de recibir u
 | B | Componentes base, formulario único y Movimientos | Parcial: formulario único, Movimientos completos (filtros, orden, paginación, lote, exportación, historial) y 9 componentes base; faltan DatePicker/MonthPicker/RangePicker propios, IconColorPicker, BottomSheet, Accordion, DataTable genérica y CommandPalette (ver matriz UX-22) |
 | C | Catálogo y Presupuesto | Hecha con salvedades: Catálogo (altas, edición, orden, eliminación segura, selector de icono/color de ~146 iconos) y Presupuesto (fuentes, cajas, impacto de activar/desactivar, ajuste por mes, plantillas mensuales, copiar mes) con pruebas de interfaz, de consistencia cliente=servidor y en navegador. Salvedades en la matriz (PRE-01, PRE-06, CTL-02, CTL-04, CTL-09) |
 | D | Gastos del mes y compromisos | Hecha con salvedades: plantillas de gasto, modal de registro por lote idempotente, compromisos con un solo vínculo; verificada con simulador/demo y navegador. Estados Vencido y vista de compromisos llegan con Salud financiera (Fase F) |
-| E | Dashboard y filtros globales | Pendiente |
+| E | Dashboard y filtros globales | Hecha con salvedades: Inicio completo (resumen, 8 KPIs, acumulado, diario, donut, Top 5, cajas, jerarquía, Sankey, burbujas), filtros globales en la URL con vistas guardadas y estados vacíos; verificada con demo/simulador y navegador. Salvedades: puntero sobre Sankey/burbujas sin probar, Salud aún no consume los filtros, bundle principal 178 KB gz (objetivo ≤130 KB, se aborda con carga diferida en la Fase H) |
 | F | Salud financiera y conciliación | Pendiente |
 | G | Planificación, recordatorios, búsqueda y Configuración | Pendiente |
 | H | Importación/exportación, mantenimiento, atajo, seguridad, a11y, PWA y rendimiento | Pendiente |
@@ -43,7 +43,7 @@ Entorno de pruebas aislado: pendiente de crear por el propietario o de recibir u
 
 ## Próximo paso
 
-Fase E: Dashboard completo y filtros globales en la URL.
+Fase F: Salud financiera (5 secciones) y conciliación append-only.
 
 ## Bloqueos conocidos
 

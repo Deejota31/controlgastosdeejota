@@ -14,7 +14,7 @@ test.describe('Conexión y demo', () => {
   test('"Probar en modo demo" carga Inicio con datos y permite salir', async ({ page }) => {
     await page.goto('/')
     await page.getByRole('button', { name: 'Probar en modo demo' }).click()
-    await expect(page.getByText('Movimientos en total')).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByRole('heading', { name: 'Ticket promedio' })).toBeVisible({ timeout: 15_000 })
     await expect(page.getByText(/Estás en modo demo/)).toBeVisible()
     await page.getByRole('button', { name: 'Salir de la demo' }).click()
     await expect(page.getByRole('heading', { name: 'Conecta tu hoja para empezar' })).toBeVisible()
@@ -23,8 +23,8 @@ test.describe('Conexión y demo', () => {
 
   test('?demo=60 muestra datos sembrados sin tocar localStorage', async ({ page }) => {
     await page.goto('/?demo=60#/')
-    await expect(page.getByText('Últimos movimientos')).toBeVisible({ timeout: 20_000 })
-    await expect(page.locator('ul li').first()).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Gasto por ámbito' })).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByRole('list', { name: 'Leyenda de Gasto por ámbito' }).locator('li').first()).toBeVisible()
     expect(await page.evaluate(() => localStorage.getItem('dj.conexion.v1'))).toBeNull()
   })
 
@@ -39,7 +39,7 @@ test.describe('Conexión y demo', () => {
       if (u.hostname !== 'localhost' && u.hostname !== '127.0.0.1') externas.push(r.url())
     })
     await page.goto('/?demo=30#/')
-    await expect(page.getByText('Movimientos en total')).toBeVisible({ timeout: 15_000 })
+    await expect(page.getByRole('heading', { name: 'Ticket promedio' })).toBeVisible({ timeout: 15_000 })
     await expect(page.getByText(/Estás en modo demo/)).toBeVisible()
     expect(await page.evaluate(() => localStorage.getItem('dj.conexion.v1'))).toBe(real)
     expect(await page.evaluate(() => localStorage.getItem('dj.cola.v1'))).toBeNull()

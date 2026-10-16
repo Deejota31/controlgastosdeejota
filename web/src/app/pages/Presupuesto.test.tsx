@@ -3,36 +3,13 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Hojas } from '@/api/esquemas'
 import { useDatos } from '@/store/datos'
-import { hojasPrueba, mov } from '@/test/fixtures'
+import { hojasF3, hojasPrueba } from '@/test/fixtures'
+
+const meta = { creado_en: '', actualizado_en: '', version: 3 }
 import { Presupuesto } from './Presupuesto'
 
 const mutar = vi.fn()
-const meta = { creado_en: '', actualizado_en: '', version: 3 }
-
-function f3(): Hojas {
-  const h = hojasPrueba()
-  h.fuentes = [{ id: 'f1', nombre: 'Sueldo', monto_defecto: 1000, moneda: 'PEN', recurrencia: 'mensual', mes_inicio: '2026-09', mes_fin: '', icono: 'wallet', color: '#16a34a', orden: 1, activo: true, es_principal: true, ...meta }]
-  h.fuente_medios = [{ id: 'x1', fuente_id: 'f1', medio_pago_id: 'med-efe', orden: 1 }]
-  h.fuentes_mes = [
-    { id: 'fm1', fuente_id: 'f1', mes: '2026-10', monto: 1000, estado: 'aplicada', actualizado_en: '' },
-    { id: 'fm0', fuente_id: 'f1', mes: '2026-09', monto: 900, estado: 'aplicada', actualizado_en: '' },
-  ]
-  h.cajas = [
-    { id: 'c1', nombre: 'Comida', alcance: 'categoria', alcance_id: 'cat-a', monto_defecto: 200, icono: 'utensils', color: '#f59e0b', descripcion: '', orden: 1, activo: true, ...meta },
-    { id: 'c2', nombre: 'Movilidad', alcance: 'categoria', alcance_id: 'cat-t', monto_defecto: 300, icono: 'bus', color: '#6366f1', descripcion: '', orden: 2, activo: true, ...meta },
-  ]
-  h.cajas_mes = [
-    { id: 'cm1', caja_id: 'c1', mes: '2026-10', monto: 200, estado: 'aplicada', actualizado_en: '' },
-    { id: 'cm2', caja_id: 'c2', mes: '2026-10', monto: 300, estado: 'aplicada', actualizado_en: '' },
-    { id: 'cm0', caja_id: 'c1', mes: '2026-09', monto: 180, estado: 'aplicada', actualizado_en: '' },
-  ]
-  h.movimientos = [
-    mov({ id: 'm1', monto: 250, monto_base: 250, categoria_id: 'cat-a', subcategoria_id: 'sub-caf' }),
-    mov({ id: 'm2', monto: 100, monto_base: 100, categoria_id: 'cat-t', subcategoria_id: 'sub-bus' }),
-    mov({ id: 'm3', monto: 100, monto_base: 100, categoria_id: 'cat-s', subcategoria_id: 'sub-luz', ambito_id: 'amb-h' }),
-  ]
-  return h
-}
+const f3 = hojasF3
 
 function montar(h: Hojas = f3()) {
   mutar.mockReset()

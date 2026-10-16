@@ -14,3 +14,14 @@ if (typeof window !== 'undefined' && !window.matchMedia) {
       dispatchEvent: () => false,
     }) as MediaQueryList
 }
+
+// La URL (hash) es estado compartido entre pruebas del mismo archivo: cada prueba parte de «#/» sin filtros.
+import { afterEach } from 'vitest'
+if (typeof window !== 'undefined') {
+  afterEach(() => {
+    if (window.location.hash && window.location.hash !== '#/') {
+      window.history.replaceState(null, '', '#/')
+      window.dispatchEvent(new HashChangeEvent('hashchange'))
+    }
+  })
+}

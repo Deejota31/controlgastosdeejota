@@ -6,9 +6,9 @@
 
 ## Resumen (306 requisitos)
 
-- pendiente: **187**
-- verificado en demo: **89**
-- en curso: **27**
+- pendiente: **172**
+- verificado en demo: **101**
+- en curso: **30**
 - implementado sin verificar: **3**
 
 ## Requisitos
@@ -16,7 +16,7 @@
 | ID | requisito | origen/sección | pantalla/acción | implementación | API/hoja implicada | prueba automatizada | prueba de integración | evidencia | estado | bloqueo |
 |---|---|---|---|---|---|---|---|---|---|---|
 | AUD-01 | Movimientos, Presupuesto, Catálogo, Salud y Planificación son módulos completos (sin EnConstruccion) | B1 | Todas las rutas |  | todas |  |  |  | pendiente |  |
-| AUD-02 | Inicio es el dashboard completo de la especificación | B1/J7.4 | Inicio |  | bootstrap |  |  |  | pendiente |  |
+| AUD-02 | Inicio es el dashboard completo de la especificación | B1/J7.4 | Inicio | Inicio es el dashboard completo de la especificación (secciones 1–8 de J7.4) | bootstrap | Inicio.test.tsx, e2e/inicio.spec.ts |  |  | verificado en demo | Con datos de demo/simulador; no con la hoja real |
 | AUD-03 | Buscar y Ctrl+K funcionan (búsqueda global y acciones) | B1/J7.2 | Barra superior |  | — |  |  |  | pendiente |  |
 | AUD-04 | La campana muestra recordatorios y estados vacíos reales | B1/J7.2 | Barra superior |  | config, planificacion |  |  |  | pendiente |  |
 | AUD-05 | Un único flujo demo (botón = ?demo), aislado y consistente | B1/C2/J4.2 | Sin conexión, banner |  | — |  |  |  | pendiente |  |
@@ -132,7 +132,7 @@
 | UX-13 | Táctil ≥44 px, etiquetas, contraste, foco visible, scroll del modal, teclado virtual, safe area | E4/J5.2 | Todas |  | — |  |  |  | pendiente |  |
 | UX-14 | Dialogs/drawer: foco inicial, contención, fondo inerte, Escape, devolución de foco; menús en portal | E4/J5.6 | Layout | Modal, ConfirmDialog, Flotante (portal con volteo), MenuAcciones | — | e2e/fundaciones.spec.ts (modal), e2e/movimientos.spec.ts (menú de fila dentro de pantalla), Combobox.test.tsx |  |  | en curso | Falta Drawer con fondo inerte y BottomSheet |
 | UX-15 | Cada KPI/gráfico con explicación accesible; gráficos con tabla/resumen equivalente; vacíos sin datos ficticios | E4/J5.6 | Dashboard |  | — |  |  |  | pendiente |  |
-| UX-16 | Acumulado a todo el ancho; Top 5 alternable; jerarquía contraída; sin gráfico "Últimos 6 meses"; Sankey incluido | E4/J7.4 | Dashboard |  | — |  |  |  | pendiente |  |
+| UX-16 | Acumulado a todo el ancho; Top 5 alternable; jerarquía contraída; sin gráfico "Últimos 6 meses"; Sankey incluido | E4/J7.4 | Dashboard | Acumulado a todo el ancho, Top 5 alternable, jerarquía contraída, Sankey incluido y sin gráfico «Últimos 6 meses» | — | Inicio.test.tsx, e2e/inicio.spec.ts |  |  | en curso | Interacción con puntero de los gráficos sin probar en navegador |
 | UX-17 | Un aviso "sin datos" ofrece acción existente; conectado vacío no oculta el alta | E4/J5.5 | Todas |  | — |  |  |  | pendiente |  |
 | UX-18 | Layout escritorio (barra lateral 76/240 recordada), tablet (drawer, 2 columnas), móvil (barra inferior, FAB, tarjetas, hojas inferiores) | J5.2 | Layout |  | — |  |  |  | pendiente |  |
 | UX-19 | Tema Claro/Oscuro/Sistema con tokens semánticos | J5.1 | Global |  | config.tema |  |  |  | pendiente |  |
@@ -182,19 +182,19 @@
 | BAR-02 | Campana: Preparar ahora / Recordar mañana / Descartar el aviso del mes | J7.2 | Campana |  | config |  |  |  | pendiente |  |
 | BAR-03 | Indicador Al día / N pendientes / Sin conexión y botón Actualizar incremental | J7.2 | Barra |  | cambios |  |  |  | pendiente |  |
 | BAR-04 | "Mi hoja" abre la hoja real o lleva a conectar con etiqueta correcta | J5.2/AUD-11 | Barra |  | — |  |  |  | pendiente |  |
-| FLT-01 | Período: Este mes, Mes anterior, 3/6/12 meses, Este año, Personalizado, con flechas ← → | J7.3 | Filtros |  | — |  |  |  | pendiente |  |
-| FLT-02 | Multiselección dependiente con búsqueda: Ámbito→Categoría→Subcategoría + medio, tipo de gasto y recurrente | J7.3 | Filtros |  | — |  |  |  | pendiente |  |
-| FLT-03 | Chips de filtros activos y Limpiar | J7.3 | Filtros |  | — |  |  |  | pendiente |  |
-| FLT-04 | Vistas guardadas con nombre | J7.3 | Filtros |  | config |  |  |  | pendiente |  |
-| FLT-05 | Filtros viven en la URL y se comparten entre Inicio, Movimientos, Presupuesto y Salud; consistentes tras recarga | J7.3 | Filtros |  | — |  |  |  | pendiente |  |
-| DSH-01 | Saludo y botones + Nuevo gasto / Gastos del mes | J7.4 | Inicio |  | — |  |  |  | pendiente |  |
-| DSH-02 | Resumen: P, gastado, disponible, reservado, libre inicial, fuera de cajas, saldo libre, % consumido con barra segmentada y leyenda | J7.4 | Inicio |  | — |  |  |  | pendiente |  |
-| DSH-03 | 8 KPIs con ⓘ y variación vs mes anterior | J7.4 | Inicio |  | — |  |  |  | pendiente |  |
-| DSH-04 | Gasto acumulado (real, ideal, proyección, presupuesto) y gasto diario con promedio | J7.4 | Inicio |  | — |  |  |  | pendiente |  |
-| DSH-05 | Donut por ámbito (total al centro, leyenda filtra) y Top 5 Categorías/Subcategorías | J7.4 | Inicio |  | — |  |  |  | pendiente |  |
-| DSH-06 | Mini tarjetas de cajas con progreso y estado | J7.4 | Inicio |  | — |  |  |  | pendiente |  |
-| DSH-07 | Análisis: Jerarquía (contraída), Flujo de medios (Sankey SVG), Frecuencia vs monto (burbujas) | J7.4 | Inicio |  | — |  |  |  | pendiente |  |
-| DSH-08 | Mes sin configurar: Preparar mi mes / Copiar del mes anterior | J7.4 | Inicio |  | — |  |  |  | pendiente |  |
+| FLT-01 | Período: Este mes, Mes anterior, 3/6/12 meses, Este año, Personalizado, con flechas ← → | J7.3 | Filtros | BarraFiltros: presets, flechas ← → por amplitud y fechas personalizadas | — | filtros.test.ts, Inicio.test.tsx, e2e/inicio.spec.ts |  |  | verificado en demo |  |
+| FLT-02 | Multiselección dependiente con búsqueda: Ámbito→Categoría→Subcategoría + medio, tipo de gasto y recurrente | J7.3 | Filtros | MultiSelect Ámbito→Categoría→Subcategoría dependientes (depurarDependientes), medio, tipo y recurrente | — | filtros.test.ts, Movimientos.test.tsx, Inicio.test.tsx |  |  | verificado en demo |  |
+| FLT-03 | Chips de filtros activos y Limpiar | J7.3 | Filtros | Chips de filtros activos con quitar y «Limpiar filtros» | — | Inicio.test.tsx, e2e/inicio.spec.ts |  |  | verificado en demo |  |
+| FLT-04 | Vistas guardadas con nombre | J7.3 | Filtros | Vistas guardadas en config.vistas_filtros (validada en Code.gs: 20 máx., sin duplicados ni fórmulas) | config | backend.test.mjs, e2e/inicio.spec.ts |  |  | verificado en demo |  |
+| FLT-05 | Filtros viven en la URL y se comparten entre Inicio, Movimientos, Presupuesto y Salud; consistentes tras recarga | J7.3 | Filtros | Filtros en la URL con lectura estricta, compartidos entre Inicio, Movimientos y Presupuesto (el mes); los enlaces de navegación los arrastran | — | filtros.test.ts, Inicio.test.tsx, e2e/inicio.spec.ts |  |  | en curso | Salud financiera aún no existe; Presupuesto usa solo el último mes del período |
+| DSH-01 | Saludo y botones + Nuevo gasto / Gastos del mes | J7.4 | Inicio | Inicio: saludo por zona horaria y botones Nuevo gasto / Gastos del mes | — | Inicio.test.tsx, e2e/inicio.spec.ts |  |  | verificado en demo |  |
+| DSH-02 | Resumen: P, gastado, disponible, reservado, libre inicial, fuera de cajas, saldo libre, % consumido con barra segmentada y leyenda | J7.4 | Inicio | Resumen con barra segmentada Gastado + Reservado sin usar + Saldo libre y leyenda; reconcilia con F3 (450/550/350) y con el caso anulado (200/800/400) | — | Inicio.test.tsx, e2e/inicio.spec.ts |  |  | verificado en demo |  |
+| DSH-03 | 8 KPIs con ⓘ y variación vs mes anterior | J7.4 | Inicio | 8 KPIs con ⓘ y variación vs mes anterior (tono según signo) | — | Inicio.test.tsx, e2e/inicio.spec.ts |  |  | verificado en demo |  |
+| DSH-04 | Gasto acumulado (real, ideal, proyección, presupuesto) y gasto diario con promedio | J7.4 | Inicio | LineaAcumulada (real, ideal, proyección, presupuesto) y BarrasDiarias con promedio; mensuales si el rango supera 62 días; tabla equivalente | — | Inicio.test.tsx, e2e/inicio.spec.ts |  |  | verificado en demo |  |
+| DSH-05 | Donut por ámbito (total al centro, leyenda filtra) y Top 5 Categorías/Subcategorías | J7.4 | Inicio | Donut por ámbito con leyenda que filtra (URL) y Top 5 Categorías/Subcategorías | — | Inicio.test.tsx, e2e/inicio.spec.ts |  |  | verificado en demo |  |
+| DSH-06 | Mini tarjetas de cajas con progreso y estado | J7.4 | Inicio | Mini tarjetas de cajas con progreso y estado («Excedida 125 %») | — | Inicio.test.tsx, e2e/inicio.spec.ts |  |  | verificado en demo |  |
+| DSH-07 | Análisis: Jerarquía (contraída), Flujo de medios (Sankey SVG), Frecuencia vs monto (burbujas) | J7.4 | Inicio | Jerarquía contraída con Expandir/Contraer, Sankey SVG propio y burbujas sin superposición (layout.test.ts) | — | Inicio.test.tsx, layout.test.ts, e2e/inicio.spec.ts |  |  | en curso | El resaltado/tooltip con puntero del Sankey y las burbujas no se ha probado en navegador; solo render, geometría y foco |
+| DSH-08 | Mes sin configurar: Preparar mi mes / Copiar del mes anterior | J7.4 | Inicio | Mes sin presupuesto: «Preparar mi mes» y «Copiar del mes anterior» (abre el diálogo en Presupuesto) | — | Inicio.test.tsx, e2e/inicio.spec.ts |  |  | verificado en demo |  |
 | MOV-01 | Formulario: ámbito en chips con icono; categoría dependiente solo activas; subcategoría obligatoria si hay | J7.5 | Formulario | FormMovimiento + lib/catalogo.ts | movimiento.guardar | FormMovimiento.test.tsx |  |  | en curso | Los chips de ámbito aún no llevan icono |
 | MOV-02 | Descripción: autocompleta con subcategoría, Reemplazar/Conservar, Otros/Por Clasificar vacía, normaliza al salir | J7.5 | Formulario | FormMovimiento (autocompletado y confirmación) | — | FormMovimiento.test.tsx |  |  | en curso | Falta el caso Otros/Por Clasificar vacío y normalizar al salir del campo (se normaliza al guardar) |
 | MOV-03 | Monto grande, moneda permitida y equivalente en base en vivo | J7.5 | Formulario | MoneyInput + FormMovimiento (equivalente en base con el tipo de cambio vigente o el congelado al editar) | — | FormMovimiento.test.tsx, MoneyInput.test.ts |  |  | verificado en demo |  |

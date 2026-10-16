@@ -383,6 +383,14 @@ describe('configuración', () => {
     expect(e.llamar('config.guardar', { items: [{ clave: 'cualquier_cosa', valor: 'x' }] }).ok).toBe(false)
     expect(e.llamar('config.guardar', { items: [{ clave: 'tema', valor: 'oscuro' }] }).ok).toBe(true)
   })
+  it('guarda vistas de filtros validadas y rechaza nombres repetidos, fórmulas y consultas con símbolos', () => {
+    const v = (arr) => e.llamar('config.guardar', { items: [{ clave: 'vistas_filtros', valor: JSON.stringify(arr) }] })
+    expect(v([{ id: 'v1', nombre: 'Solo comida', query: 'p=ultimos_3&a=amb-1' }]).ok).toBe(true)
+    expect(v([{ id: 'v1', nombre: 'A', query: 'p=x' }, { id: 'v2', nombre: 'a', query: 'p=y' }]).ok).toBe(false)
+    expect(v([{ id: 'v1', nombre: '=SUMA(1)', query: 'p=x' }]).ok).toBe(false)
+    expect(v([{ id: 'v1', nombre: 'Ok', query: 'p=<script>' }]).ok).toBe(false)
+    expect(v(Array.from({ length: 21 }, (_, i) => ({ id: 'v' + i, nombre: 'N' + i, query: 'p=x' }))).ok).toBe(false)
+  })
   it('valida las monedas y no inventa tipos de cambio', () => {
     expect(e.llamar('movimiento.guardar', gasto({ moneda: 'USD' })).ok).toBe(false)
     e.datos('config.guardar', { items: [{ clave: 'monedas_permitidas', valor: 'PEN,USD' }] })

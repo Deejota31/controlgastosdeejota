@@ -3321,6 +3321,25 @@ function validarConfig(clave, valor) {
     if (u.length !== 3 || u.some(function (n) { return !isFinite(n) || n <= 0 || n > 200 || Math.floor(n) !== n; }) || !(u[0] < u[1] && u[1] <= u[2])) invalido('valor', 'Usa tres umbrales crecientes (ej. 70,90,100).');
     return u.join(',');
   }
+  if (clave === 'vistas_filtros') {
+    var arr;
+    try { arr = v ? JSON.parse(v) : []; } catch (e2) { arr = null; }
+    if (!Array.isArray(arr)) invalido('valor', 'Las vistas guardadas deben ser una lista.');
+    if (arr.length > 20) invalido('valor', 'Puedes guardar hasta 20 vistas.');
+    var nombresVistas = {};
+    var limpias = arr.map(function (x) {
+      if (!esObjeto(x) || typeof x.id !== 'string' || !/^[A-Za-z0-9_-]{1,64}$/.test(x.id)) invalido('valor', 'Vista con identificador no válido.');
+      var nom = typeof x.nombre === 'string' ? x.nombre.trim() : '';
+      if (!nom || nom.length > 40) invalido('valor', 'El nombre de la vista debe tener entre 1 y 40 caracteres.');
+      if (/^[=+\-@]/.test(nom)) invalido('valor', 'El nombre de la vista no puede empezar por = + - @.');
+      var kn = nom.toLowerCase();
+      if (nombresVistas[kn]) invalido('valor', 'Ya existe una vista con el nombre "' + nom + '".');
+      nombresVistas[kn] = true;
+      if (typeof x.query !== 'string' || x.query.length > 600 || !/^[A-Za-z0-9_=&,.\-]*$/.test(x.query)) invalido('valor', 'Los filtros de la vista no son válidos.');
+      return { id: x.id, nombre: nom, query: x.query };
+    });
+    return JSON.stringify(limpias);
+  }
   if (clave === 'ahorro_simulado_pct') {
     var n = Number(v);
     if (!isFinite(n) || n < 0 || n > 100) invalido('valor', 'El porcentaje debe estar entre 0 y 100.');

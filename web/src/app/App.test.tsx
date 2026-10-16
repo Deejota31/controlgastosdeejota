@@ -132,7 +132,7 @@ describe('Conectar mi hoja', () => {
     await userEvent.type(await screen.findByLabelText('URL de la aplicación web de Apps Script'), 'https://script.google.com/macros/s/AKfycbxAbCdEfGhIjKlMnOpQrStUv/exec')
     await userEvent.type(screen.getByLabelText('Token de acceso'), backend.token)
     await userEvent.click(screen.getByRole('button', { name: 'Probar y conectar' }))
-    expect(await screen.findByText('Movimientos en total', {}, { timeout: 8000 })).toBeInTheDocument()
+    expect(await screen.findByText('Ticket promedio', {}, { timeout: 8000 })).toBeInTheDocument()
     expect(useConexion.getState().modo).toBe('real')
     expect(JSON.parse(localStorage.getItem('dj.conexion.v1')!).url).toContain('/exec')
     expect(window.location.hash).toBe('#/')

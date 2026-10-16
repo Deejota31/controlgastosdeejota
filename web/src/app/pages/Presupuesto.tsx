@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight, Copy, Plus, Search, Wallet } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { Caja, Fuente, Plantilla } from '@/api/esquemas'
 import { Button, IconButton } from '@/components/Button'
 import { claseCampo } from '@/components/Campo'
@@ -10,7 +10,10 @@ import { MenuAcciones } from '@/components/MenuAcciones'
 import { Switch } from '@/components/Switch'
 import { Tabs } from '@/components/Tabs'
 import { aCentimos, formatoMoneda } from '@/engine/dinero'
-import { sumarMeses } from '@/engine/fechas'
+import { primerDia, sumarMeses, ultimoDia } from '@/engine/fechas'
+import { mesesCompletos } from '@/engine/periodo'
+import { periodoDeFiltros, soloFiltros, useFiltros, type PresetFiltro } from '@/lib/filtros'
+import { navegar } from '@/lib/router'
 import { useHoy } from '@/lib/fecha'
 import { useDatos } from '@/store/datos'
 import { toast } from '@/store/toasts'
@@ -48,11 +51,29 @@ export function Presupuesto() {
   const pendientes = useDatos((s) => s.pendientes)
   const hoy = useHoy(zona)
   const base = (config['moneda_base'] || 'PEN').toUpperCase()
-  const [mes, setMes] = useState(hoy.slice(0, 7))
+  const { filtros, cambiar: cambiarFiltros, ruta } = useFiltros(hoy)
+  // El mes sale del período de la URL (compartido con Inicio y Movimientos): con varios meses se muestra el último.
+  const meses = mesesCompletos(filtros)
+  const mes = meses ? meses[meses.length - 1]! : hoy.slice(0, 7)
+  const setMes = (m: string) => {
+    const preset: PresetFiltro = m === hoy.slice(0, 7) ? 'este_mes' : m === sumarMeses(hoy.slice(0, 7), -1) ? 'mes_anterior' : 'personalizado'
+    cambiarFiltros({ ...filtros, preset, ...(preset === 'personalizado' ? { desde: primerDia(m), hasta: ultimoDia(m) } : periodoDeFiltros(preset, hoy)) })
+  }
   const [pestana, setPestana] = useState<Pestana>('fuentes')
   const [dialogo, setDialogo] = useState<Dialogo | null>(null)
   const [enviando, setEnviando] = useState(false)
   const [filtro, setFiltro] = useState<FiltroCajas>({ texto: '', alcance: '', estado: '', orden: 'manual' })
+  // «Copiar del mes anterior» desde Inicio llega con ?accion=copiar.
+  const accion = ruta.params.get('accion')
+  const atendida = useRef<string | null>(null)
+  useEffect(() => {
+    if (accion === 'copiar' && atendida.current !== 'copiar') {
+      atendida.current = 'copiar'
+      setDialogo({ t: 'copiar' })
+      navegar('/presupuesto', soloFiltros(ruta.params), { reemplazar: true })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accion])
 
   const r = useMemo(() => calcularMes(vista, config, mes), [vista, config, mes])
   const fuentes = useMemo(() => [...vista.fuentes].sort((a, b) => a.orden - b.orden), [vista.fuentes])

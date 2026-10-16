@@ -1,23 +1,22 @@
 import { Download, FileSpreadsheet, ListChecks, Plus, Receipt, Search } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/Button'
-import { Campo, claseCampo } from '@/components/Campo'
+import { claseCampo } from '@/components/Campo'
 import { ConfirmDialog } from '@/components/ConfirmDialog'
 import { DragList } from '@/components/DragList'
 import { EmptyState } from '@/components/EmptyState'
 import { KpiCard } from '@/components/KpiCard'
 import { MenuAcciones } from '@/components/MenuAcciones'
-import { MultiSelect } from '@/components/MultiSelect'
 import { Pagination, paginar } from '@/components/Pagination'
 import { Segmented } from '@/components/Segmented'
 import type { Movimiento } from '@/api/esquemas'
 import { aCentimos, formatoMoneda } from '@/engine/dinero'
-import { primerDia, sumarMeses, ultimoDia } from '@/engine/fechas'
 import { cn } from '@/lib/cn'
 import { aCsv, aXlsx, descargar, type Celda } from '@/lib/exportar'
 import { useHoy } from '@/lib/fecha'
 import { useMediaQuery } from '@/lib/mediaQuery'
-import { navegar, useRuta } from '@/lib/router'
+import { filtrosPorDefecto, hayFiltrosActivos, useFiltros } from '@/lib/filtros'
+import { navegar } from '@/lib/router'
 import { useDatos } from '@/store/datos'
 import { useFormMov } from '@/store/formMov'
 import { useGastosMes } from '@/store/gastosMes'
@@ -26,8 +25,7 @@ import { BarraSeleccion } from '../movimientos/BarraSeleccion'
 import { consultar, nombresDe, totalesDe, type ColOrden, type Consulta, type EstadoFiltro } from '../movimientos/consulta'
 import { accionesDe, Etiquetas, Importe, Insignias, type AccionesFila } from '../movimientos/FilaMovimiento'
 import { Historial } from '../movimientos/Historial'
-
-type Preset = 'este_mes' | 'mes_anterior' | 'este_ano' | 'todo' | 'personalizado'
+import { BarraFiltros } from '../filtros/BarraFiltros'
 
 const COLUMNAS: Array<{ col: Exclude<ColOrden, 'manual'>; etiqueta: string; derecha?: boolean }> = [
   { col: 'fecha', etiqueta: 'Fecha' },
@@ -37,24 +35,6 @@ const COLUMNAS: Array<{ col: Exclude<ColOrden, 'manual'>; etiqueta: string; dere
   { col: 'monto', etiqueta: 'Monto', derecha: true },
 ]
 
-function rangoDe(preset: Preset, hoy: string, custom: { desde: string; hasta: string }) {
-  const mes = hoy.slice(0, 7)
-  switch (preset) {
-    case 'este_mes':
-      return { desde: primerDia(mes), hasta: ultimoDia(mes) }
-    case 'mes_anterior': {
-      const m = sumarMeses(mes, -1)
-      return { desde: primerDia(m), hasta: ultimoDia(m) }
-    }
-    case 'este_ano':
-      return { desde: `${hoy.slice(0, 4)}-01-01`, hasta: `${hoy.slice(0, 4)}-12-31` }
-    case 'todo':
-      return { desde: '', hasta: '' }
-    default:
-      return custom
-  }
-}
-
 export function Movimientos() {
   const vista = useDatos((s) => s.vista)
   const config = useDatos((s) => s.config)
@@ -62,18 +42,13 @@ export function Movimientos() {
   const mutar = useDatos((s) => s.mutar)
   const hoy = useHoy(zona)
   const base = (config['moneda_base'] || 'PEN').toUpperCase()
-  const ruta = useRuta()
+  const { filtros, cambiar: cambiarFiltros, ruta } = useFiltros(hoy)
   const abrirForm = useFormMov((s) => s.abrir)
   const abrirGastosMes = useGastosMes((s) => s.abrir)
   const ancho = useMediaQuery('(min-width: 768px)')
 
   const [texto, setTexto] = useState('')
   const [estado, setEstado] = useState<EstadoFiltro>('activos')
-  const [preset, setPreset] = useState<Preset>('este_mes')
-  const [custom, setCustom] = useState({ desde: primerDia(hoy.slice(0, 7)), hasta: hoy })
-  const [ambitos, setAmbitos] = useState<string[]>([])
-  const [categorias, setCategorias] = useState<string[]>([])
-  const [medios, setMedios] = useState<string[]>([])
   const [orden, setOrden] = useState<ColOrden>('fecha')
   const [dir, setDir] = useState<'asc' | 'desc'>('desc')
   const [pagina, setPagina] = useState(1)
@@ -84,10 +59,10 @@ export function Movimientos() {
   const [resaltado, setResaltado] = useState<string | null>(null)
   const refResaltado = useRef<string | null>(null)
 
-  const { desde, hasta } = rangoDe(preset, hoy, custom)
+  const { desde, hasta, ambitos, categorias, subcategorias, medios, tipos, recurrente } = filtros
   const consulta: Consulta = useMemo(
-    () => ({ texto, estado, desde, hasta, ambitos, categorias, medios, orden, dir }),
-    [texto, estado, desde, hasta, ambitos, categorias, medios, orden, dir],
+    () => ({ texto, estado, desde, hasta, ambitos, categorias, subcategorias, medios, tipos, recurrente, orden, dir }),
+    [texto, estado, desde, hasta, ambitos, categorias, subcategorias, medios, tipos, recurrente, orden, dir],
   )
   const nombres = useMemo(() => nombresDe(vista), [vista.ambitos, vista.categorias, vista.subcategorias, vista.medios_pago])
   const filtrados = useMemo(() => consultar(vista, consulta, nombres), [vista, consulta, nombres])
@@ -95,7 +70,7 @@ export function Movimientos() {
   const pag = paginar(filtrados, pagina, tamano)
 
   // Cualquier cambio de filtro vuelve a la primera página (la selección se conserva).
-  useEffect(() => setPagina(1), [texto, estado, desde, hasta, ambitos, categorias, medios, orden, dir, tamano])
+  useEffect(() => setPagina(1), [texto, estado, desde, hasta, ambitos, categorias, subcategorias, medios, tipos, recurrente, orden, dir, tamano])
   // La selección no puede apuntar a movimientos que ya no existen.
   useEffect(() => {
     const existen = new Set(vista.movimientos.map((m) => m.id))
@@ -107,12 +82,9 @@ export function Movimientos() {
   useEffect(() => {
     if (!idResaltar || refResaltado.current === idResaltar) return
     refResaltado.current = idResaltar
-    setPreset('todo')
+    cambiarFiltros({ ...filtrosPorDefecto(hoy), preset: 'todo', desde: '', hasta: '' }, { reemplazar: true })
     setEstado('todos')
     setTexto('')
-    setAmbitos([])
-    setCategorias([])
-    setMedios([])
     setOrden('fecha')
     setDir('desc')
     setResaltado(idResaltar)
@@ -190,18 +162,12 @@ export function Movimientos() {
     toast.ok(`Exportados ${filtrados.length} movimientos.`)
   }
 
-  const hayFiltros = !!texto || estado !== 'activos' || ambitos.length > 0 || categorias.length > 0 || medios.length > 0 || preset !== 'este_mes'
+  const hayFiltros = !!texto || estado !== 'activos' || hayFiltrosActivos(filtros)
   const limpiar = () => {
     setTexto('')
     setEstado('activos')
-    setPreset('este_mes')
-    setAmbitos([])
-    setCategorias([])
-    setMedios([])
+    cambiarFiltros(filtrosPorDefecto(hoy))
   }
-  const opcAmb = vista.ambitos.map((a) => ({ valor: a.id, etiqueta: a.nombre }))
-  const opcCat = vista.categorias.map((c) => ({ valor: c.id, etiqueta: c.nombre }))
-  const opcMed = vista.medios_pago.map((m) => ({ valor: m.id, etiqueta: m.nombre }))
   const volver = ruta.params.get('volver')
 
   return (
@@ -222,7 +188,9 @@ export function Movimientos() {
         <KpiCard titulo="Promedio" valor={formatoMoneda(tot.cantidad ? Math.round(tot.total / tot.cantidad) : 0, base)} />
       </div>
 
-      <section aria-label="Filtros" className="grid grid-cols-1 gap-3 rounded-card border border-line bg-surface p-3 shadow-1 md:p-4">
+      <BarraFiltros hoy={hoy} filtros={filtros} onCambiar={cambiarFiltros} />
+
+      <section aria-label="Búsqueda y orden" className="grid grid-cols-1 gap-3 rounded-card border border-line bg-surface p-3 shadow-1 md:p-4">
         <div className="flex flex-wrap items-end gap-3">
           <div className="relative min-w-[12rem] flex-1">
             <Search aria-hidden className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted" />
@@ -235,35 +203,6 @@ export function Movimientos() {
           <Button icono={<Plus className="size-4" aria-hidden />} className="max-md:hidden" onClick={() => abrirForm('nuevo')}>
             Nuevo movimiento
           </Button>
-        </div>
-        <div className="flex flex-wrap items-end gap-3">
-          <Segmented
-            etiqueta="Período"
-            value={preset}
-            onChange={setPreset}
-            opciones={[
-              { valor: 'este_mes', etiqueta: 'Este mes' },
-              { valor: 'mes_anterior', etiqueta: 'Mes anterior' },
-              { valor: 'este_ano', etiqueta: 'Este año' },
-              { valor: 'todo', etiqueta: 'Todo' },
-              { valor: 'personalizado', etiqueta: 'Otro' },
-            ]}
-          />
-          {preset === 'personalizado' && (
-            <>
-              <Campo id="mov-desde" etiqueta="Desde">
-                <input id="mov-desde" type="date" className={claseCampo} value={custom.desde} max={custom.hasta || undefined} onChange={(e) => setCustom({ ...custom, desde: e.target.value })} />
-              </Campo>
-              <Campo id="mov-hasta" etiqueta="Hasta">
-                <input id="mov-hasta" type="date" className={claseCampo} value={custom.hasta} min={custom.desde || undefined} onChange={(e) => setCustom({ ...custom, hasta: e.target.value })} />
-              </Campo>
-            </>
-          )}
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <MultiSelect etiqueta="Ámbito" placeholder="Todos los ámbitos" opciones={opcAmb} valor={ambitos} onChange={setAmbitos} />
-          <MultiSelect etiqueta="Categoría" placeholder="Todas las categorías" opciones={opcCat} valor={categorias} onChange={setCategorias} />
-          <MultiSelect etiqueta="Medio de pago" placeholder="Todos los medios" opciones={opcMed} valor={medios} onChange={setMedios} />
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <label className="flex max-w-full min-w-0 items-center gap-2 text-muted">
