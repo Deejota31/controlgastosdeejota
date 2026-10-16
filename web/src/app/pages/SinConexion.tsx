@@ -1,6 +1,8 @@
 import { PlugZap } from 'lucide-react'
 import { EmptyState } from '@/components/EmptyState'
 import { navegar } from '@/lib/router'
+import { useConexion } from '@/store/conexion'
+import { useDatos } from '@/store/datos'
 
 /** Estado "sin conexión configurada": nunca muestra datos falsos. */
 export function SinConexion({ modulo }: { modulo: string }) {
@@ -13,7 +15,7 @@ export function SinConexion({ modulo }: { modulo: string }) {
       accionSecundaria={{
         etiqueta: 'Probar en modo demo',
         onClick: () => {
-          window.location.search = '?demo'
+          void useConexion.getState().usarDemo().then(() => useDatos.getState().iniciar())
         },
       }}
     />

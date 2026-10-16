@@ -1,6 +1,7 @@
-import { Bell, ChevronsLeft, ChevronsRight, Menu, Plus, Search, Settings, CloudCheck, ExternalLink } from 'lucide-react'
+import { Bell, ChevronsLeft, ChevronsRight, Menu, Plus, Search, Settings, ExternalLink } from 'lucide-react'
 import { useEffect, type ReactNode } from 'react'
 import { IconButton } from '@/components/Button'
+import { BannerDemo, EstadoSync } from '@/components/EstadoSync'
 import { Logo } from '@/components/Logo'
 import { cn } from '@/lib/cn'
 import { navegar, useRuta } from '@/lib/router'
@@ -110,10 +111,7 @@ function Topbar() {
       <IconButton etiqueta="Recordatorios">
         <Bell className="size-5" aria-hidden />
       </IconButton>
-      <span className="hidden items-center gap-1.5 rounded-full bg-ok-soft px-3 py-1 text-sm font-medium text-ok md:inline-flex" role="status">
-        <CloudCheck className="size-4" aria-hidden />
-        Al día
-      </span>
+      <EstadoSync className="hidden md:inline-flex" />
       <a
         href="#/configuracion"
         className="hidden min-h-11 items-center gap-1.5 rounded-ctl px-3 font-medium text-muted hover:bg-surface-2 hover:text-ink lg:inline-flex"
@@ -182,6 +180,7 @@ export function Layout({ children }: { children: ReactNode }) {
         className="flex min-h-[100dvh] min-w-0 flex-col transition-[padding] duration-200 xl:pl-[var(--pl)]"
         style={{ ['--pl' as string]: mini ? 'var(--sidebar-w-mini)' : 'var(--sidebar-w)' }}
       >
+        <BannerDemo />
         <Topbar />
         <main className="mx-auto w-full max-w-[1400px] min-w-0 flex-1 px-4 py-5 pb-[calc(var(--bottombar-h)+var(--safe-bottom)+88px)] md:px-6 md:pb-8">
           {children}

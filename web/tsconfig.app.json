@@ -19,7 +19,7 @@
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": false,
     "types": ["vite/client", "vite-plugin-pwa/client", "@testing-library/jest-dom"],
-    "paths": { "@/*": ["./src/*"] }
+    "paths": { "@/*": ["./src/*"], "@gas/*": ["../apps-script/test/*"], "@shared/*": ["../shared/*"] }
   },
   "include": ["src"]
 }
