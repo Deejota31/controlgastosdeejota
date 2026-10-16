@@ -1,0 +1,641 @@
+{
+  "version": 1,
+  "medios": [
+    {
+      "nombre": "Yape",
+      "tipo": "billetera",
+      "icono": "smartphone",
+      "color": "#451E67"
+    },
+    {
+      "nombre": "Plin",
+      "tipo": "billetera",
+      "icono": "smartphone",
+      "color": "#254BE4"
+    },
+    {
+      "nombre": "Sodexo",
+      "tipo": "vale",
+      "icono": "ticket",
+      "color": "#25E4D4"
+    },
+    {
+      "nombre": "Transferencia",
+      "tipo": "transferencia",
+      "icono": "landmark",
+      "color": "#2585E4"
+    },
+    {
+      "nombre": "Efectivo",
+      "tipo": "efectivo",
+      "icono": "banknote",
+      "color": "#B4E425"
+    },
+    {
+      "nombre": "Otros",
+      "tipo": "otro",
+      "icono": "ellipsis",
+      "color": "#64748B"
+    }
+  ],
+  "categorias": {
+    "Alimentación": {
+      "icono": "utensils",
+      "color": "#B4E425"
+    },
+    "Auto": {
+      "icono": "car",
+      "color": "#254BE4"
+    },
+    "Transporte": {
+      "icono": "bus",
+      "color": "#2585E4"
+    },
+    "Servicios": {
+      "icono": "plug",
+      "color": "#25BEE4"
+    },
+    "Suscripciones": {
+      "icono": "repeat",
+      "color": "#8B25E4"
+    },
+    "Compras": {
+      "icono": "shopping-bag",
+      "color": "#D425E4"
+    },
+    "Salud": {
+      "icono": "heart-pulse",
+      "color": "#25E445"
+    },
+    "Cuidado Personal": {
+      "icono": "scissors",
+      "color": "#E425AB"
+    },
+    "Educación": {
+      "icono": "graduation-cap",
+      "color": "#4525E4"
+    },
+    "Herramientas y Equipamiento": {
+      "icono": "wrench",
+      "color": "#25E4D4"
+    },
+    "Plan Nube": {
+      "icono": "cloud",
+      "color": "#206BB6"
+    },
+    "Regalos": {
+      "icono": "gift",
+      "color": "#671E51"
+    },
+    "Salidas": {
+      "icono": "party-popper",
+      "color": "#611E67"
+    },
+    "Bebé": {
+      "icono": "baby",
+      "color": "#25E49E"
+    },
+    "Hogar": {
+      "icono": "house",
+      "color": "#65E425"
+    },
+    "Apoyo Familiar": {
+      "icono": "hand-heart",
+      "color": "#451E67"
+    },
+    "Salud Familiar": {
+      "icono": "stethoscope",
+      "color": "#20B639"
+    },
+    "Otros": {
+      "icono": "ellipsis",
+      "color": "#64748B"
+    }
+  },
+  "subcategorias_icono": {
+    "Desayuno": "coffee",
+    "Almuerzo": "utensils",
+    "Cena": "soup",
+    "Delivery": "bike",
+    "Snack / Antojos": "cookie",
+    "Bebidas": "cup-soda",
+    "Gasolina": "fuel",
+    "Gas": "flame",
+    "Car Wash": "droplets",
+    "Estacionamiento": "circle-parking",
+    "Mantenimiento": "wrench",
+    "Repuestos": "cog",
+    "Seguro Vehicular": "shield-check",
+    "SOAT": "file-check",
+    "Revisión Técnica": "clipboard-check",
+    "Multas": "receipt-text",
+    "Taxi": "car-taxi-front",
+    "Moto Taxi": "bike",
+    "Bus / Micro": "bus",
+    "Línea Celular": "smartphone",
+    "Juegos": "gamepad-2",
+    "ChatGPT": "bot",
+    "Claude": "sparkles",
+    "Cluely": "eye",
+    "Google": "globe",
+    "Spotify": "music",
+    "Netflix": "clapperboard",
+    "HBO Max": "tv",
+    "Prime Video": "film",
+    "Crunchyroll": "play",
+    "Tecnología": "laptop",
+    "Perfumes": "spray-can",
+    "Accesorios": "watch",
+    "Ropa": "shirt",
+    "Calzado": "footprints",
+    "Regalos": "gift",
+    "Electrodomésticos": "refrigerator",
+    "Muebles": "sofa",
+    "Consultas Médicas": "stethoscope",
+    "Medicamentos": "pill",
+    "Exámenes Médicos": "test-tube",
+    "Odontología": "smile",
+    "Barbería / Peluquería": "scissors",
+    "Higiene Personal": "bath",
+    "Gimnasio": "dumbbell",
+    "Maestría": "graduation-cap",
+    "Matrícula": "badge-check",
+    "Libros": "book-open",
+    "Certificaciones": "award",
+    "Plataformas Educativas": "monitor-play",
+    "Cursos": "notebook-pen",
+    "Imprevistos": "triangle-alert",
+    "Trámites": "file-text",
+    "Por Clasificar": "tag",
+    "Software Laboral": "app-window",
+    "Equipos de Trabajo": "monitor",
+    "Hospedaje": "bed-double",
+    "Cuidado Íntimo": "heart",
+    "Detalle Mensual": "flower-2",
+    "Fecha Especial": "calendar-heart",
+    "Aniversario": "cake",
+    "Sorpresas": "party-popper",
+    "Paseos": "trees",
+    "Cine": "clapperboard",
+    "Diversión": "smile-plus",
+    "Restaurantes": "chef-hat",
+    "Actividades Recreativas": "tent",
+    "Leche": "milk",
+    "Pañales": "baby",
+    "Pañitos": "sparkles",
+    "Alimentación": "utensils",
+    "Juguetes": "blocks",
+    "Cuidado Infantil": "heart-handshake",
+    "Supermercado": "shopping-cart",
+    "Limpieza": "spray-can",
+    "Reparaciones": "hammer",
+    "Luz": "lightbulb",
+    "Agua": "droplet",
+    "Internet": "wifi",
+    "Padre": "user",
+    "Madre": "user-round",
+    "Pareja": "heart",
+    "Hija": "baby",
+    "Hermanos": "users",
+    "Apoyo Económico": "hand-coins",
+    "Regalo Familiar": "gift",
+    "Emergencias": "siren",
+    "Reuniones": "users-round",
+    "Actividades Deportivas": "trophy",
+    "Cumpleaños": "cake",
+    "Fechas Especiales": "calendar-heart",
+    "Otros": "ellipsis"
+  },
+  "ambitos": [
+    {
+      "nombre": "Personal",
+      "icono": "user",
+      "color": "#254BE4",
+      "categorias": [
+        {
+          "nombre": "Alimentación",
+          "subcategorias": [
+            "Desayuno",
+            "Almuerzo",
+            "Cena",
+            "Delivery",
+            "Snack / Antojos",
+            "Bebidas",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Auto",
+          "subcategorias": [
+            "Gasolina",
+            "Gas",
+            "Car Wash",
+            "Estacionamiento",
+            "Mantenimiento",
+            "Repuestos",
+            "Seguro Vehicular",
+            "SOAT",
+            "Revisión Técnica",
+            "Multas",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Transporte",
+          "subcategorias": [
+            "Taxi",
+            "Moto Taxi",
+            "Bus / Micro",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Servicios",
+          "subcategorias": [
+            "Línea Celular",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Suscripciones",
+          "subcategorias": [
+            "Juegos",
+            "ChatGPT",
+            "Claude",
+            "Cluely",
+            "Google",
+            "Spotify",
+            "Netflix",
+            "HBO Max",
+            "Prime Video",
+            "Crunchyroll",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Compras",
+          "subcategorias": [
+            "Tecnología",
+            "Perfumes",
+            "Accesorios",
+            "Ropa",
+            "Calzado",
+            "Regalos",
+            "Electrodomésticos",
+            "Muebles",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Salud",
+          "subcategorias": [
+            "Consultas Médicas",
+            "Medicamentos",
+            "Exámenes Médicos",
+            "Odontología",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Cuidado Personal",
+          "subcategorias": [
+            "Barbería / Peluquería",
+            "Higiene Personal",
+            "Gimnasio",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Educación",
+          "subcategorias": [
+            "Maestría",
+            "Matrícula",
+            "Libros",
+            "Certificaciones",
+            "Plataformas Educativas",
+            "Cursos",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Otros",
+          "subcategorias": [
+            "Imprevistos",
+            "Trámites",
+            "Por Clasificar",
+            "Otros"
+          ]
+        }
+      ]
+    },
+    {
+      "nombre": "Trabajo",
+      "icono": "briefcase",
+      "color": "#4525E4",
+      "categorias": [
+        {
+          "nombre": "Alimentación",
+          "subcategorias": [
+            "Desayuno",
+            "Almuerzo",
+            "Cena",
+            "Delivery",
+            "Snack / Antojos",
+            "Bebidas",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Transporte",
+          "subcategorias": [
+            "Taxi",
+            "Moto Taxi",
+            "Bus / Micro",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Herramientas y Equipamiento",
+          "subcategorias": [
+            "Software Laboral",
+            "Equipos de Trabajo",
+            "Accesorios",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Otros",
+          "subcategorias": [
+            "Imprevistos",
+            "Trámites",
+            "Por Clasificar",
+            "Otros"
+          ]
+        }
+      ]
+    },
+    {
+      "nombre": "Pareja",
+      "icono": "heart",
+      "color": "#671E51",
+      "categorias": [
+        {
+          "nombre": "Alimentación",
+          "subcategorias": [
+            "Desayuno",
+            "Almuerzo",
+            "Cena",
+            "Delivery",
+            "Snack / Antojos",
+            "Bebidas",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Plan Nube",
+          "subcategorias": [
+            "Hospedaje",
+            "Cuidado Íntimo",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Transporte",
+          "subcategorias": [
+            "Taxi",
+            "Moto Taxi",
+            "Bus / Micro",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Regalos",
+          "subcategorias": [
+            "Detalle Mensual",
+            "Fecha Especial",
+            "Aniversario",
+            "Sorpresas",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Compras",
+          "subcategorias": [
+            "Tecnología",
+            "Perfumes",
+            "Accesorios",
+            "Ropa",
+            "Calzado",
+            "Regalos",
+            "Electrodomésticos",
+            "Muebles",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Salidas",
+          "subcategorias": [
+            "Paseos",
+            "Cine",
+            "Juegos",
+            "Diversión",
+            "Restaurantes",
+            "Actividades Recreativas",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Otros",
+          "subcategorias": [
+            "Imprevistos",
+            "Trámites",
+            "Por Clasificar",
+            "Otros"
+          ]
+        }
+      ]
+    },
+    {
+      "nombre": "Familia",
+      "icono": "users",
+      "color": "#B4E425",
+      "categorias": [
+        {
+          "nombre": "Alimentación",
+          "subcategorias": [
+            "Desayuno",
+            "Almuerzo",
+            "Cena",
+            "Delivery",
+            "Snack / Antojos",
+            "Bebidas",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Bebé",
+          "subcategorias": [
+            "Leche",
+            "Pañales",
+            "Pañitos",
+            "Ropa",
+            "Alimentación",
+            "Juguetes",
+            "Accesorios",
+            "Consultas Médicas",
+            "Medicamentos",
+            "Cuidado Infantil",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Hogar",
+          "subcategorias": [
+            "Supermercado",
+            "Limpieza",
+            "Reparaciones",
+            "Mantenimiento",
+            "Electrodomésticos",
+            "Muebles",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Servicios",
+          "subcategorias": [
+            "Luz",
+            "Agua",
+            "Gas",
+            "Internet",
+            "Línea Celular",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Transporte",
+          "subcategorias": [
+            "Taxi",
+            "Moto Taxi",
+            "Bus / Micro",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Compras",
+          "subcategorias": [
+            "Tecnología",
+            "Perfumes",
+            "Accesorios",
+            "Ropa",
+            "Calzado",
+            "Regalos",
+            "Electrodomésticos",
+            "Muebles",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Apoyo Familiar",
+          "subcategorias": [
+            "Padre",
+            "Madre",
+            "Pareja",
+            "Hija",
+            "Hermanos",
+            "Apoyo Económico",
+            "Regalo Familiar",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Salud Familiar",
+          "subcategorias": [
+            "Consultas Médicas",
+            "Medicamentos",
+            "Exámenes Médicos",
+            "Emergencias",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Educación",
+          "subcategorias": [
+            "Maestría",
+            "Matrícula",
+            "Libros",
+            "Certificaciones",
+            "Plataformas Educativas",
+            "Cursos",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Otros",
+          "subcategorias": [
+            "Imprevistos",
+            "Trámites",
+            "Por Clasificar",
+            "Otros"
+          ]
+        }
+      ]
+    },
+    {
+      "nombre": "Amigos",
+      "icono": "party-popper",
+      "color": "#611E67",
+      "categorias": [
+        {
+          "nombre": "Alimentación",
+          "subcategorias": [
+            "Desayuno",
+            "Almuerzo",
+            "Cena",
+            "Delivery",
+            "Snack / Antojos",
+            "Bebidas",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Transporte",
+          "subcategorias": [
+            "Taxi",
+            "Moto Taxi",
+            "Bus / Micro",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Salidas",
+          "subcategorias": [
+            "Cine",
+            "Paseos",
+            "Juegos",
+            "Diversión",
+            "Reuniones",
+            "Actividades Deportivas",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Regalos",
+          "subcategorias": [
+            "Cumpleaños",
+            "Fechas Especiales",
+            "Otros"
+          ]
+        },
+        {
+          "nombre": "Otros",
+          "subcategorias": [
+            "Imprevistos",
+            "Trámites",
+            "Por Clasificar",
+            "Otros"
+          ]
+        }
+      ]
+    }
+  ]
+}
