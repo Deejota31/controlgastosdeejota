@@ -179,6 +179,7 @@ function ConexionActual({ onCambiar }: { onCambiar: () => void }) {
   const url = useConexion((s) => s.url)
   const desconectar = useConexion((s) => s.desconectar)
   const reiniciar = useDatos((s) => s.reiniciar)
+  const sinEnviar = useDatos((s) => s.pendientes.length)
   const [confirmar, setConfirmar] = useState(false)
   return (
     <section className="grid gap-3 rounded-card border border-line bg-surface p-4 shadow-1 md:p-6" aria-label="Conexión actual">
@@ -205,7 +206,11 @@ function ConexionActual({ onCambiar }: { onCambiar: () => void }) {
         impacto={
           modo === 'demo'
             ? 'Se borran los datos de ejemplo de este navegador. No se toca ninguna hoja real.'
-            : 'Se olvida la URL y el token de este navegador y se borran los datos en caché. Tu hoja de Google Sheets no se modifica. Los cambios que aún no se hayan enviado se pierden.'
+            : `Se olvida la URL y el token de este navegador y se borran los datos en caché. Tu hoja de Google Sheets no se modifica.${
+                sinEnviar
+                  ? ` Hay ${sinEnviar} ${sinEnviar === 1 ? 'cambio' : 'cambios'} sin enviar: se conservan en este dispositivo y se enviarán si vuelves a conectar esta misma hoja.`
+                  : ''
+              }`
         }
         confirmar={modo === 'demo' ? 'Salir' : 'Desconectar'}
         peligro

@@ -11,15 +11,34 @@ export function EstadoSync({ className }: { className?: string }) {
   const enLinea = useDatos((s) => s.enLinea)
   const sincronizando = useDatos((s) => s.sincronizando)
   const estado = useDatos((s) => s.estado)
+  const porConfirmar = useDatos((s) => s.porConfirmar)
+  const pausada = useDatos((s) => s.pausada)
+  const reintentar = useDatos((s) => s.reintentarAhora)
   if (modo === 'sin-config') return null
 
   let texto = 'Al día'
   let tono = 'bg-ok-soft text-ok'
   let Icono = CloudCheck
+  if (pausada) {
+    return (
+      <button
+        type="button"
+        onClick={reintentar}
+        className={cn('inline-flex items-center gap-1.5 rounded-full bg-warn-soft px-3 py-1 text-sm font-medium text-warn', className)}
+      >
+        <CloudOff className="size-4" aria-hidden />
+        {pendientes} sin enviar · Reintentar
+      </button>
+    )
+  }
   if (!enLinea) {
     texto = pendientes ? `Sin conexión · ${pendientes} por enviar` : 'Sin conexión'
     tono = 'bg-warn-soft text-warn'
     Icono = CloudOff
+  } else if (porConfirmar) {
+    texto = porConfirmar === 1 ? 'Confirmando 1 cambio…' : `Confirmando ${porConfirmar} cambios…`
+    tono = 'bg-warn-soft text-warn'
+    Icono = Loader2
   } else if (pendientes) {
     texto = pendientes === 1 ? 'Guardando…' : `Guardando ${pendientes}…`
     tono = 'bg-primary-soft text-primary'

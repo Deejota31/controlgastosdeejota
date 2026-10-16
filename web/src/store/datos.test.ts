@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { crearBackendDemo, type BackendDemo } from '@/demo/backend-demo'
 import { ApiError, crearCliente, type Transporte } from '@/api/cliente'
-import { Cola } from '@/api/cola'
+import { Cola, almacenMemoria as colaMemoria, type Almacen } from '@/api/cola'
 import { crearDatos } from './datos'
 import { useToasts } from './toasts'
 
@@ -28,10 +28,12 @@ function transporteDe(backend: BackendDemo) {
   return { ctl, transporte }
 }
 
-async function dispositivo(backend: BackendDemo, persistirCola = false) {
+async function dispositivo(backend: BackendDemo, almacenCola?: Almacen) {
   const { ctl, transporte } = transporteDe(backend)
   const cliente = crearCliente(() => ({ transporte, token: backend.token }))
-  const d = crearDatos({ cliente, cola: new Cola(persistirCola), sinInstantanea: true, esperaReintentoMs: () => 5 })
+  const cola = new Cola()
+  if (almacenCola) await cola.usarAlmacen(almacenCola)
+  const d = crearDatos({ cliente, cola, sinInstantanea: true, esperaReintentoMs: () => 30 })
   await d.store.getState().iniciar()
   return { ...d, ctl, estado: () => d.store.getState() }
 }
@@ -122,7 +124,7 @@ describe('store de datos', () => {
 
   it('fusiona crear + editar mientras el alta sigue pendiente (un solo envío)', async () => {
     const d = await dispositivo(backend)
-    d.ctl.modo = 'caido'
+    const sinRed = vi.spyOn(navigator, 'onLine', 'get').mockReturnValue(false)
     const g = gasto(refs(d.estado()))
     void d.estado().mutar('movimiento.guardar', g)
     await vi.waitFor(() => expect(d.estado().enLinea).toBe(false))
@@ -130,8 +132,10 @@ describe('store de datos', () => {
     expect(d.estado().pendientes).toHaveLength(1)
     expect(d.estado().vista.movimientos[0]!.monto).toBe(99)
     d.ctl.llamadas.length = 0
-    d.ctl.modo = 'ok'
+    sinRed.mockRestore()
+    d.estado().reintentarAhora()
     await vi.waitFor(() => expect(d.estado().pendientes).toHaveLength(0))
+    expect(d.ctl.llamadas.filter((c) => c.action === 'movimiento.guardar')).toHaveLength(1)
     const b = (await backend.enviar({ action: 'bootstrap', token: backend.token, payload: {} })) as { data: { hojas: { movimientos: Array<{ monto: number; version: number }> } } }
     expect(b.data.hojas.movimientos).toHaveLength(1)
     expect(b.data.hojas.movimientos[0]).toMatchObject({ monto: 99, version: 1 })
@@ -178,14 +182,18 @@ describe('store de datos', () => {
   })
 
   it('la cola persistente sobrevive a un reinicio de la app', async () => {
-    const a = await dispositivo(backend, true)
+    const almacen = colaMemoria()
+    const a = await dispositivo(backend, almacen)
     a.ctl.modo = 'caido'
     const g = gasto(refs(a.estado()))
     void a.estado().mutar('movimiento.guardar', g)
     await vi.waitFor(() => expect(a.estado().enLinea).toBe(false))
-    expect(JSON.parse(localStorage.getItem('dj.cola.v1')!)).toHaveLength(1)
+    await a.cola.persistido()
+    const guardados = await almacen.todos()
+    expect(guardados).toHaveLength(1)
+    expect(guardados[0]!.incierto).toBe(true) // salió y no se conoce el resultado
     // "Reinicio": nueva instancia con la misma cola persistida y red disponible
-    const b = await dispositivo(backend, true)
+    const b = await dispositivo(backend, almacen)
     await vi.waitFor(() => expect(b.estado().pendientes).toHaveLength(0))
     await vi.waitFor(() => expect(b.estado().confirmado.movimientos).toHaveLength(1))
   })
@@ -193,7 +201,7 @@ describe('store de datos', () => {
   it('un token inválido no descarta lo escrito: queda en la cola esperando', async () => {
     const d = await dispositivo(backend)
     const malo = crearCliente(() => ({ transporte: transporteDe(backend).transporte, token: 'malo' }))
-    const e = crearDatos({ cliente: malo, cola: new Cola(false), sinInstantanea: true, esperaReintentoMs: () => 5000 })
+    const e = crearDatos({ cliente: malo, cola: new Cola(), sinInstantanea: true, esperaReintentoMs: () => 5000 })
     void e.store.getState().mutar('movimiento.guardar', gasto(refs(d.estado())))
     await vi.waitFor(() => expect(e.store.getState().error).toMatch(/Token/))
     expect(e.store.getState().pendientes).toHaveLength(1)
