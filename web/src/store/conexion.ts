@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { ApiError, nuevoRequestId, transporteHttp, type Transporte } from '@/api/cliente'
+import { ApiError, crearCliente, nuevoRequestId, transporteHttp, type Transporte } from '@/api/cliente'
 import { leerParametrosDemo, type ParametrosDemo } from '@/demo/parametros'
 import { borrarClave, guardarJson, leerJson } from '@/lib/almacen'
 
@@ -67,6 +67,44 @@ export async function crearTransporteDemo(pd: ParametrosDemo | null = null): Pro
   }
 }
 
+/** La URL debe ser https y terminar en /exec (aplicación web de Apps Script). */
+export function validarUrlWebApp(url: string): string | null {
+  const u = url.trim()
+  if (!u) return 'Pega la URL de la aplicación web.'
+  let parsed: URL
+  try {
+    parsed = new URL(u)
+  } catch {
+    return 'La URL no es válida. Debe verse como https://script.google.com/macros/s/…/exec'
+  }
+  if (parsed.protocol !== 'https:') return 'La URL debe empezar con https://'
+  if (!parsed.pathname.endsWith('/exec')) return 'La URL debe terminar en /exec (la de la implementación como aplicación web, no la del editor).'
+  return null
+}
+
+export interface ResultadoPrueba {
+  version: string
+  ms: number
+  hojas: number
+  zona: string
+}
+
+/** Prueba la conexión SIN guardarla: pide el bootstrap y mide la latencia. Lanza ApiError si falla. */
+export async function probarConexion(url: string, token: string, timeoutMs = 20_000): Promise<ResultadoPrueba> {
+  const e = validarUrlWebApp(url)
+  if (e) throw new ApiError('VALIDATION', e, 'url')
+  if (!token.trim()) throw new ApiError('VALIDATION', 'Pega el token de acceso.', 'token')
+  const cliente = crearCliente(() => ({ transporte: transporteHttp(url.trim(), timeoutMs), token: token.trim() }))
+  const t0 = performance.now()
+  const r = await cliente.llamar<{ hojas?: Record<string, unknown[]>; zona_horaria?: string }>('bootstrap', {}, { reintentos: 0 })
+  return {
+    version: r.version ?? '—',
+    ms: Math.round(performance.now() - t0),
+    hojas: Object.keys(r.data.hojas ?? {}).length,
+    zona: r.data.zona_horaria ?? 'America/Lima',
+  }
+}
+
 /** Datos para el cliente API: transporte y token vigentes (o null si falta conectar). */
 export function configCliente(): { transporte: Transporte; token: string } | null {
   return transporte ? { transporte, token: tokenActivo } : null
@@ -103,7 +141,10 @@ export const useConexion = create<ConexionState>((set, get) => ({
   desconectar() {
     transporte = null
     tokenActivo = ''
-    if (!paramsDemo) borrarClave(CLAVE)
+    if (!paramsDemo) {
+      borrarClave(CLAVE)
+      borrarClave('dj.demo.v1')
+    }
     set({ modo: 'sin-config', url: '', token: '', listo: false })
   },
   async asegurar() {

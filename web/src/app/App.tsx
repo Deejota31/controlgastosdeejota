@@ -8,6 +8,8 @@ import { Layout } from './Layout'
 import { Mas } from './pages/Mas'
 import { SinConexion } from './pages/SinConexion'
 import { EnConstruccion } from './pages/EnConstruccion'
+import { Configuracion } from './pages/Configuracion'
+import { Inicio } from './pages/Inicio'
 import { UiCatalog } from './pages/UiCatalog'
 import { NAV_PRINCIPAL } from './nav'
 
@@ -19,6 +21,15 @@ export function catalogoDisponible(): boolean {
 function Pantalla({ path }: { path: string }) {
   if (path === '/ui' && catalogoDisponible()) return <UiCatalog />
   if (path === '/mas') return <Mas />
+  // Configuración es la única pantalla que no necesita conexión: aquí se conecta la hoja.
+  if (path === '/configuracion') return <Configuracion />
+  if (path === '/') {
+    return (
+      <Gate modulo="Inicio">
+        <Inicio />
+      </Gate>
+    )
+  }
   const item = NAV_PRINCIPAL.find((n) => n.path === path)
   if (item) {
     return (

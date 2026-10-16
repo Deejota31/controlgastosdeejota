@@ -35,6 +35,7 @@ export interface RespuestaOk<T> {
   generacion?: string
   repetido?: boolean
   ms?: number
+  version?: string
 }
 
 export function nuevoRequestId(): string {
