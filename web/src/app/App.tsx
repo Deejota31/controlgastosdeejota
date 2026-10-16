@@ -11,6 +11,7 @@ import { EnConstruccion } from './pages/EnConstruccion'
 import { Configuracion } from './pages/Configuracion'
 import { Inicio } from './pages/Inicio'
 import { Catalogo } from './pages/Catalogo'
+import { Presupuesto } from './pages/Presupuesto'
 import { Movimientos } from './pages/Movimientos'
 import { FormMovimientoGlobal } from './movimientos/FormGlobal'
 import { UiCatalog } from './pages/UiCatalog'
@@ -37,6 +38,13 @@ function Pantalla({ path }: { path: string }) {
     return (
       <Gate modulo="Movimientos">
         <Movimientos />
+      </Gate>
+    )
+  }
+  if (path === '/presupuesto') {
+    return (
+      <Gate modulo="Presupuesto">
+        <Presupuesto />
       </Gate>
     )
   }

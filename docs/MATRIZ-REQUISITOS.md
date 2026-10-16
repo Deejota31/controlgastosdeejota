@@ -6,9 +6,9 @@
 
 ## Resumen (306 requisitos)
 
-- pendiente: **206**
-- verificado en demo: **72**
-- en curso: **25**
+- pendiente: **194**
+- verificado en demo: **82**
+- en curso: **27**
 - implementado sin verificar: **3**
 
 ## Requisitos
@@ -70,7 +70,7 @@
 | FIN-02 | monto_base y tipo de cambio congelados al registrar; editar recalcula de forma explícita y auditable | D5 | Formulario |  | movimiento.guardar |  |  |  | pendiente |  |
 | FIN-03 | Cambiar una tasa de configuración no revaloriza movimientos antiguos | D5 | Configuración |  | config.guardar |  |  |  | pendiente |  |
 | FIN-04 | Cambio de moneda base con histórico: procedimiento con respaldo y aprobación; selector explica el impacto | D5 | Configuración |  | config.guardar |  |  |  | pendiente |  |
-| FIN-05 | Fuentes y cajas se aplican al mes explícitamente; la recurrencia solo sugiere | D5/J2.2 | Presupuesto |  | fuenteMes/cajaMes |  |  |  | pendiente |  |
+| FIN-05 | Fuentes y cajas se aplican al mes explícitamente; la recurrencia solo sugiere | D5/J2.2 | Presupuesto | Las fuentes y cajas solo cuentan en los meses donde se aplican explícitamente | fuenteMes/cajaMes | servidor.test.ts, logica.test.ts |  |  | verificado en demo |  |
 | FIN-06 | "Desde este mes" no cambia meses anteriores | D5/J7.7 | Presupuesto |  | fuenteMes.aplicar |  |  |  | pendiente |  |
 | FIN-07 | Estado efectivo por mes: un cambio de catálogo no reescribe presupuestos históricos; política documentada | D5 | Presupuesto |  | fuentes_mes, cajas_mes |  |  |  | pendiente |  |
 | FIN-08 | Fuentes en otras monedas se convierten de forma auditable al consolidar; se define dónde se congela | D5 | Presupuesto |  | fuentes_mes |  |  |  | pendiente |  |
@@ -217,17 +217,17 @@
 | GM-05 | Registrar N gastos: lote idempotente todo o nada con vínculo de compromisos | J7.6 | Gastos del mes |  | movimientos.lote |  |  |  | pendiente |  |
 | GM-06 | Acciones Usar, Editar, Clonar (sin duplicados exactos), Eliminar (vuelve al modal), Reordenar | J7.6 | Gastos del mes |  | plantilla.* |  |  |  | pendiente |  |
 | GM-07 | Guardar plantilla no registra gastos; cada unidad tiene ID propio; accesible desde Inicio y Movimientos | E3 | Gastos del mes |  | — |  |  |  | pendiente |  |
-| PRE-01 | Fuentes: lista/tarjetas recordada; formulario con nombre único, monto, moneda, recurrencia, medios, principal, activa | J7.7 | Presupuesto |  | fuente.guardar |  |  |  | pendiente |  |
-| PRE-02 | Interruptor ON/OFF con vista previa de impacto (P y disponible antes/después) | J7.7 | Presupuesto |  | fuente.guardar |  |  |  | pendiente |  |
-| PRE-03 | Ajustar importe del mes ("solo este mes"/"desde este mes") y quitar ajuste | J7.7 | Presupuesto |  | fuenteMes.* |  |  |  | pendiente |  |
-| PRE-04 | Menú ⋯ de fuente: Clonar (inactiva), Guardar como plantilla, Subir/Bajar, Eliminar u ofrecer desactivar | J7.7 | Presupuesto |  | fuente.eliminar |  |  |  | pendiente |  |
-| PRE-05 | Cajas: búsqueda, filtro de alcance/estado, orden (manual/nombre/monto/%/más gastadas) | J7.7 | Presupuesto |  | — |  |  |  | pendiente |  |
-| PRE-06 | Formulario de caja con alcance (ámbito/categoría/subcategoría "Cat › Sub"/medio), monto, descripción, activa, aspecto del alcance | J7.7 | Presupuesto |  | caja.guardar |  |  |  | pendiente |  |
-| PRE-07 | Tarjeta de caja: barra con Al día/Atención 70/Crítico 90/Excedida X %, disponible negativo en rojo, aviso de solapamientos | J7.7 | Presupuesto |  | — |  |  |  | pendiente |  |
-| PRE-08 | Ajustar monto del mes de la caja y quitar ajuste; menú ⋯ igual que fuentes | J7.7 | Presupuesto |  | cajaMes.* |  |  |  | pendiente |  |
-| PRE-09 | Plantillas mensuales de fuentes y cajas: crear, aplicar con vista previa Crear/Actualizar/Sin cambios/Omitir; reaplicar no duplica | J7.7 | Presupuesto |  | plantilla.aplicarMes |  |  |  | pendiente |  |
-| PRE-10 | Estados Pendiente/Aplicada/No aplica este mes idempotentes | J7.7/E3 | Presupuesto |  | fuenteMes/cajaMes |  |  |  | pendiente |  |
-| PRE-11 | Copiar configuración del mes anterior con vista previa editable, sin duplicar ni sobrescribir | J7.7 | Presupuesto |  | mes.copiarDeAnterior |  |  |  | pendiente |  |
+| PRE-01 | Fuentes: lista/tarjetas recordada; formulario con nombre único, monto, moneda, recurrencia, medios, principal, activa | J7.7 | Presupuesto | app/pages/Presupuesto.tsx, presupuesto/FormFuente.tsx: nombre único, monto ≥ 0, moneda, recurrencia, medios, principal, activa | fuente.guardar | Presupuesto.test.tsx, e2e/presupuesto.spec.ts |  |  | en curso | La preferencia lista/tarjetas no se recuerda (solo hay tarjetas) |
+| PRE-02 | Interruptor ON/OFF con vista previa de impacto (P y disponible antes/después) | J7.7 | Presupuesto | DialogoImpacto: presupuesto, reservado, disponible y saldo libre antes/después; no escribe hasta confirmar | fuente.guardar | logica.test.ts, Presupuesto.test.tsx, e2e/presupuesto.spec.ts |  |  | verificado en demo |  |
+| PRE-03 | Ajustar importe del mes ("solo este mes"/"desde este mes") y quitar ajuste | J7.7 | Presupuesto | DialogoAjusteMes: solo este mes / desde este mes (fuentes) y Quitar del mes | fuenteMes.* | Presupuesto.test.tsx |  |  | verificado en demo | Que «desde este mes» no altere meses anteriores se cubre por el backend (backend tests), no por una prueba de interfaz propia |
+| PRE-04 | Menú ⋯ de fuente: Clonar (inactiva), Guardar como plantilla, Subir/Bajar, Eliminar u ofrecer desactivar | J7.7 | Presupuesto | Menú de fuente: Editar, Clonar (inactiva), Guardar como plantilla, Subir/Bajar, Eliminar u ofrecer Desactivar | fuente.eliminar | Presupuesto.test.tsx |  |  | verificado en demo |  |
+| PRE-05 | Cajas: búsqueda, filtro de alcance/estado, orden (manual/nombre/monto/%/más gastadas) | J7.7 | Presupuesto | filtrarCajas: texto sin tildes, alcance, estado, orden manual/nombre/monto/% uso/más gastadas | — | logica.test.ts, Presupuesto.test.tsx |  |  | verificado en demo |  |
+| PRE-06 | Formulario de caja con alcance (ámbito/categoría/subcategoría "Cat › Sub"/medio), monto, descripción, activa, aspecto del alcance | J7.7 | Presupuesto | FormCaja: alcance con «Categoría › Sub», monto, descripción, activa, aviso de solapes | caja.guardar | Presupuesto.test.tsx, e2e/presupuesto.spec.ts |  |  | en curso | El icono y color no se heredan automáticamente del alcance: se eligen a mano (el servidor sí los sugiere si faltan) |
+| PRE-07 | Tarjeta de caja: barra con Al día/Atención 70/Crítico 90/Excedida X %, disponible negativo en rojo, aviso de solapamientos | J7.7 | Presupuesto | TarjetaCaja: Al día / Atención / Crítico / Excedida X %, disponible negativo en rojo, aviso de solapes | — | logica.test.ts, Presupuesto.test.tsx |  |  | verificado en demo |  |
+| PRE-08 | Ajustar monto del mes de la caja y quitar ajuste; menú ⋯ igual que fuentes | J7.7 | Presupuesto | Ajustar monto del mes y Quitar del mes en cajas; mismo menú que fuentes | cajaMes.* | Presupuesto.test.tsx |  |  | verificado en demo |  |
+| PRE-09 | Plantillas mensuales de fuentes y cajas: crear, aplicar con vista previa Crear/Actualizar/Sin cambios/Omitir; reaplicar no duplica | J7.7 | Presupuesto | FormPlantilla + DialogoAplicarPlantillas con Crear / Actualizar / Sin cambios / Omitir; la vista previa del cliente coincide con la del servidor | plantilla.aplicarMes | logica.test.ts, servidor.test.ts, Presupuesto.test.tsx |  |  | verificado en demo |  |
+| PRE-10 | Estados Pendiente/Aplicada/No aplica este mes idempotentes | J7.7/E3 | Presupuesto | Pendiente / Aplicada / No aplica este mes; reaplicar no duplica filas | fuenteMes/cajaMes | servidor.test.ts, logica.test.ts |  |  | verificado en demo |  |
+| PRE-11 | Copiar configuración del mes anterior con vista previa editable, sin duplicar ni sobrescribir | J7.7 | Presupuesto | DialogoCopiar: montos editables y exclusiones; no duplica ni pisa; vista previa idéntica a la del servidor | mes.copiarDeAnterior | logica.test.ts, servidor.test.ts, Presupuesto.test.tsx, e2e/presupuesto.spec.ts |  |  | verificado en demo |  |
 | CTL-01 | Contadores "X activas · Y en total", buscador con resaltado, menú + Agregar (ámbito, categoría, subcategoría, medio) | J7.8 | Catálogo | app/pages/Catalogo.tsx: contadores, buscador con resaltado sin tildes, menú Agregar | — | Catalogo.test.tsx, logica.test.ts |  |  | verificado en demo |  |
 | CTL-02 | Ámbitos: pestañas-tarjeta con interruptor, editables y reordenables | J7.8 | Catálogo | Pestañas-tarjeta con interruptor y menú; reordenar con Subir/Bajar | ambito.* | Catalogo.test.tsx |  |  | verificado en demo | Reordenar ámbitos por arrastre con puntero no probado en navegador |
 | CTL-03 | Categorías: tarjetas con interruptor, + subcategoría, menú ⋯ (Editar, Subir, Bajar, Eliminar), Otros al final | J7.8 | Catálogo | Tarjetas con interruptor por ámbito, menú Editar/Subir/Bajar/Eliminar, Otros fijo al final | categoria.* | Catalogo.test.tsx, logica.test.ts |  |  | verificado en demo |  |

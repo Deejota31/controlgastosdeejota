@@ -33,7 +33,7 @@ Entorno de pruebas aislado: pendiente de crear por el propietario o de recibir u
 | 0 | Diagnóstico, matriz y estado | En curso (matriz y estado creados) |
 | A | Transversales: fecha viva, URL estricta, demo único, cola/idempotencia, API.md, entorno de pruebas | Hecha (verificada con simulador y demo) |
 | B | Componentes base, formulario único y Movimientos | Parcial: formulario único, Movimientos completos (filtros, orden, paginación, lote, exportación, historial) y 9 componentes base; faltan DatePicker/MonthPicker/RangePicker propios, IconColorPicker, BottomSheet, Accordion, DataTable genérica y CommandPalette (ver matriz UX-22) |
-| C | Catálogo y Presupuesto | Pendiente |
+| C | Catálogo y Presupuesto | Hecha con salvedades: Catálogo (altas, edición, orden, eliminación segura, selector de icono/color de ~146 iconos) y Presupuesto (fuentes, cajas, impacto de activar/desactivar, ajuste por mes, plantillas mensuales, copiar mes) con pruebas de interfaz, de consistencia cliente=servidor y en navegador. Salvedades en la matriz (PRE-01, PRE-06, CTL-02, CTL-04, CTL-09) |
 | D | Gastos del mes y compromisos | Pendiente |
 | E | Dashboard y filtros globales | Pendiente |
 | F | Salud financiera y conciliación | Pendiente |
@@ -43,7 +43,7 @@ Entorno de pruebas aislado: pendiente de crear por el propietario o de recibir u
 
 ## Próximo paso
 
-Fase C: Catálogo (ámbitos, categorías, subcategorías, medios con reordenar y selectores de icono/color) y Presupuesto (fuentes, cajas, plantillas mensuales, copiar mes). Los componentes que faltan de la Fase B se construyen cuando esas pantallas los necesiten.
+Fase D: Gastos del mes (plantillas de gasto, compromisos con un solo vínculo a su pago, estados Pendiente/Pagado/Vencido).
 
 ## Bloqueos conocidos
 
