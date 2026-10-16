@@ -27,6 +27,31 @@ beforeEach(() => {
   cat = referencias()
 })
 
+describe('setup() en un proyecto suelto (sin hoja asociada)', () => {
+  it('crea el libro "Control de Gastos Deejota", lo recuerda y deja todo instalado', () => {
+    const x = crearEntorno({ sinLibroActivo: true })
+    const rep = x.instalar()
+    expect(rep.libro_creado).toBe(true)
+    expect(rep.libro_url).toMatch(/docs\.google\.com\/spreadsheets/)
+    const creado = [...x.libros.values()].find((l) => l.getName() === 'Control de Gastos Deejota')
+    expect(creado).toBeTruthy()
+    expect(creado.getSheets()).toHaveLength(23)
+    expect(x.props.get('SHEET_ID')).toBe(creado.getId())
+    expect(x.props.get('TOKEN')).toBeTruthy()
+    // una segunda ejecución reutiliza el mismo libro
+    const rep2 = x.instalar()
+    expect(rep2.libro_creado).toBe(false)
+    expect([...x.libros.values()].filter((l) => l.getName() === 'Control de Gastos Deejota')).toHaveLength(1)
+  })
+  it('una petición web antes de ejecutar setup se rechaza y no crea nada', () => {
+    const x = crearEntorno({ sinLibroActivo: true })
+    const r = x.llamar('bootstrap', {})
+    expect(r.ok).toBe(false)
+    expect(r.error.code).toBe('AUTH')
+    expect([...x.libros.values()].filter((l) => l.getName() === 'Control de Gastos Deejota')).toHaveLength(0)
+  })
+})
+
 describe('setup()', () => {
   it('crea las 23 hojas, quita la hoja inicial y siembra el catálogo', () => {
     const nombres = e.libro.getSheets().map((h) => h.getName())

@@ -124,7 +124,7 @@ export function crearServicios(cfg) {
       this.id = 'sim-libro-' + aleatorio(6); this.nombre = nombre; this.hojas = [new Hoja('Hoja 1')]
     }
     getId() { return this.id } getName() { return this.nombre } getUrl() { return 'https://docs.google.com/spreadsheets/d/' + this.id }
-    getSpreadsheetTimeZone() { return tz }
+    getSpreadsheetTimeZone() { return this.zona ?? tz } setSpreadsheetTimeZone(z) { this.zona = z }
     getSheetByName(n) { return this.hojas.find((h) => h.nombre === n) ?? null }
     getSheets() { return [...this.hojas] }
     insertSheet(n) {
@@ -192,7 +192,8 @@ export function crearServicios(cfg) {
     createFile: (n, c, t) => crearArchivo(n, c, t),
   }
   const SpreadsheetApp = {
-    getActiveSpreadsheet: () => principal,
+    getActiveSpreadsheet: () => (cfg.sinLibroActivo ? null : principal),
+    create: (nombre) => { const l = new Libro(nombre); libros.set(l.id, l); return l },
     openById: (id) => { const l = libros.get(id); if (!l) throw new Error('No se encontró el documento con ID ' + id); return l },
     newDataValidation: () => { const b = { requireValueInList: () => b, setAllowInvalid: () => b, build: () => ({}) }; return b },
     BandingTheme: { LIGHT_GREY: 'LIGHT_GREY' },

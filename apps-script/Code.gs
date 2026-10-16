@@ -938,7 +938,11 @@ function nuevoCtx(origen) {
   CTX = { ss: null, tz: null, t: {}, hojas: {}, audit: [], cfg: null, origen: origen || 'web', gen: null, escribio: false, indices: {} };
   return CTX;
 }
-function libro() {
+/**
+ * Devuelve el libro de datos. Con `crear` (solo desde setup) y sin libro asociado ni SHEET_ID —por ejemplo
+ * un proyecto creado en script.google.com— crea uno nuevo en tu Drive y lo recuerda.
+ */
+function libro(crear) {
   if (CTX.ss) return CTX.ss;
   var id = PropertiesService.getScriptProperties().getProperty('SHEET_ID');
   var ss = null;
@@ -948,7 +952,13 @@ function libro() {
     ss = SpreadsheetApp.getActiveSpreadsheet();
     if (ss) PropertiesService.getScriptProperties().setProperty('SHEET_ID', ss.getId());
   }
-  if (!ss) fallar('SCHEMA', 'No se encontró la hoja de cálculo. Ejecuta setup() desde el editor del libro.');
+  if (!ss && crear) {
+    ss = SpreadsheetApp.create('Control de Gastos Deejota');
+    ss.setSpreadsheetTimeZone('America/Lima');
+    PropertiesService.getScriptProperties().setProperty('SHEET_ID', ss.getId());
+    CTX.libroCreado = true;
+  }
+  if (!ss) fallar('SCHEMA', 'No se encontró la hoja de cálculo. Ejecuta setup() una vez desde el editor de Apps Script.');
   CTX.ss = ss;
   CTX.tz = ss.getSpreadsheetTimeZone();
   return ss;
@@ -1603,9 +1613,9 @@ function sembrarCatalogo() {
 function setup() {
   var propio = !CTX;
   if (propio) nuevoCtx('setup');
-  var ss = libro();
+  var ss = libro(true);
   var props = PropertiesService.getScriptProperties();
-  var reporte = { version: VERSION, hojas_creadas: [], hojas_existentes: [], semilla_catalogo: false, token_nuevo: false, avisos: [] };
+  var reporte = { version: VERSION, libro_url: ss.getUrl ? ss.getUrl() : '', libro_creado: !!CTX.libroCreado, hojas_creadas: [], hojas_existentes: [], semilla_catalogo: false, token_nuevo: false, avisos: [] };
   var nombres = Object.keys(ESQUEMAS_DEF);
   // 1) Nada se modifica si alguna hoja existente tiene encabezados distintos.
   var problemas = [];
@@ -1662,6 +1672,7 @@ function setup() {
     reporte.token = tk; // solo se devuelve cuando se crea
     console.log('TOKEN DE ACCESO (guárdalo, no se vuelve a mostrar con setup): ' + tk);
   }
+  console.log('HOJA DE CÁLCULO: ' + (ss.getUrl ? ss.getUrl() : ss.getId()));
   props.setProperty('SHEET_ID', ss.getId());
   nuevaGeneracion();
   if (propio) CTX = null;
