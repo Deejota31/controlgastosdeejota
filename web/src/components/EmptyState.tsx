@@ -6,8 +6,8 @@ export interface EmptyStateProps {
   icono: ReactNode
   titulo: string
   mensaje: string
-  accion?: { etiqueta: string; onClick: () => void }
-  accionSecundaria?: { etiqueta: string; onClick: () => void }
+  accion?: { etiqueta: string; onClick: () => void; cargando?: boolean }
+  accionSecundaria?: { etiqueta: string; onClick: () => void; cargando?: boolean }
 }
 
 export function EmptyState({ icono, titulo, mensaje, accion, accionSecundaria }: EmptyStateProps) {
@@ -18,9 +18,13 @@ export function EmptyState({ icono, titulo, mensaje, accion, accionSecundaria }:
       <p className="max-w-md text-muted">{mensaje}</p>
       {(accion || accionSecundaria) && (
         <div className="mt-2 flex flex-wrap justify-center gap-2">
-          {accion && <Button onClick={accion.onClick}>{accion.etiqueta}</Button>}
+          {accion && (
+            <Button onClick={accion.onClick} loading={accion.cargando}>
+              {accion.etiqueta}
+            </Button>
+          )}
           {accionSecundaria && (
-            <Button variante="secondary" onClick={accionSecundaria.onClick}>
+            <Button variante="secondary" onClick={accionSecundaria.onClick} loading={accionSecundaria.cargando}>
               {accionSecundaria.etiqueta}
             </Button>
           )}

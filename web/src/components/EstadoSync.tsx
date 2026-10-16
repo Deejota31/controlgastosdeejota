@@ -42,21 +42,25 @@ export function BannerDemo() {
   const desconectar = useConexion((s) => s.desconectar)
   const reiniciar = useDatos((s) => s.reiniciar)
   if (modo !== 'demo') return null
+  const enUrl = leerParametrosDemo() !== null
   return (
-    <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-accent-soft px-4 py-1.5 text-center text-sm text-ink">
+    <div role="status" className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 bg-accent-soft px-4 py-1.5 text-center text-sm text-ink">
       <FlaskConical className="size-4 shrink-0" aria-hidden />
-      <span>{leerParametrosDemo() ? 'Modo demostración: los datos viven en memoria y se pierden al recargar.' : 'Modo demostración: lo que registres vive solo en este navegador.'}</span>
+      <span>{enUrl ? 'Estás en modo demo · los datos viven en memoria y se pierden al recargar' : 'Estás en modo demo · lo que registres vive solo en este navegador'}</span>
+      <a className="font-semibold underline underline-offset-2" href="#/configuracion">
+        Conectar mi hoja
+      </a>
       <button
         type="button"
         className="font-semibold underline underline-offset-2"
         onClick={() => {
-          if (leerParametrosDemo()) {
+          if (enUrl) {
             location.href = urlSinDemo()
             return
           }
           desconectar()
           void reiniciar()
-          localStorage.removeItem('dj.demo.v1')
+          window.location.hash = '#/'
         }}
       >
         Salir de la demo
