@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { ApiError, crearCliente, nuevoRequestId, transporteHttp, type Transporte } from '@/api/cliente'
+import { validarUrlWebApp } from '@/api/url'
 import { leerParametrosDemo, type ParametrosDemo } from '@/demo/parametros'
 import { borrarClave, guardarJson, leerJson } from '@/lib/almacen'
 
@@ -67,20 +68,7 @@ export async function crearTransporteDemo(pd: ParametrosDemo | null = null): Pro
   }
 }
 
-/** La URL debe ser https y terminar en /exec (aplicación web de Apps Script). */
-export function validarUrlWebApp(url: string): string | null {
-  const u = url.trim()
-  if (!u) return 'Pega la URL de la aplicación web.'
-  let parsed: URL
-  try {
-    parsed = new URL(u)
-  } catch {
-    return 'La URL no es válida. Debe verse como https://script.google.com/macros/s/…/exec'
-  }
-  if (parsed.protocol !== 'https:') return 'La URL debe empezar con https://'
-  if (!parsed.pathname.endsWith('/exec')) return 'La URL debe terminar en /exec (la de la implementación como aplicación web, no la del editor).'
-  return null
-}
+export { validarUrlWebApp }
 
 export interface ResultadoPrueba {
   version: string

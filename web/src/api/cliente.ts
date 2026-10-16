@@ -1,3 +1,4 @@
+import { validarUrlWebApp } from './url'
 export type CodigoError = 'AUTH' | 'VALIDATION' | 'NOT_FOUND' | 'CONFLICT' | 'BUSY' | 'QUOTA' | 'SCHEMA' | 'SERVER_ERROR' | 'RED' | 'TIEMPO'
 
 const DEFINITIVOS: CodigoError[] = ['AUTH', 'VALIDATION', 'NOT_FOUND', 'CONFLICT', 'SCHEMA']
@@ -51,6 +52,8 @@ const ESTADOS_TRANSITORIOS = new Set([429, 500, 502, 503, 504])
 export function transporteHttp(url: string, timeoutMs = 20_000): Transporte {
   return {
     async enviar(p) {
+      const invalida = validarUrlWebApp(url)
+      if (invalida) throw new ApiError('VALIDATION', invalida, 'url')
       const ctl = new AbortController()
       const t = setTimeout(() => ctl.abort(), timeoutMs)
       try {

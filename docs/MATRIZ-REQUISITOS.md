@@ -6,9 +6,9 @@
 
 ## Resumen (306 requisitos)
 
-- pendiente: **261**
+- pendiente: **260**
+- verificado en demo: **34**
 - en curso: **11**
-- verificado en demo: **33**
 - implementado sin verificar: **1**
 
 ## Requisitos
@@ -23,7 +23,7 @@
 | AUD-06 | Configuración con todas sus secciones | B1/J7.11 | Configuración |  | varias |  |  |  | pendiente |  |
 | AUD-07 | El FAB móvil "Nuevo gasto" abre el formulario único | B1/J5.2 | Barra inferior |  | movimiento.guardar |  |  |  | pendiente |  |
 | AUD-08 | Fecha viva (useHoy) y zona horaria configurable en todos los cálculos | B1/J4.1 | Global |  | config.zona_horaria |  |  |  | pendiente |  |
-| AUD-09 | Validación estricta de la URL de Apps Script antes de enviar el token | B1/E5 | Configuración |  | — |  |  |  | pendiente |  |
+| AUD-09 | Validación estricta de la URL de Apps Script antes de enviar el token | B1/E5 | Configuración | web/src/api/url.ts; validación también en transporteHttp | — | web/src/api/url.test.ts (14 casos) |  |  | verificado en demo |  |
 | AUD-10 | Pruebas que detecten flujos inexistentes o rotos | B1/F | CI |  | — |  |  |  | pendiente |  |
 | AUD-11 | Mi hoja apunta al destino correcto según la conexión | B1 | Barra superior |  | config |  |  |  | pendiente |  |
 | AUD-12 | Drawer con foco controlado | B1/E4 | Layout |  | — |  |  |  | pendiente |  |

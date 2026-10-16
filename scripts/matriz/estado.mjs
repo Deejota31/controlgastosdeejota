@@ -48,4 +48,5 @@ export const ESTADOS = {
   'QA-01': { e: 'en curso', test: 'motor.test.ts, motor2.test.ts, fechaViva.test.tsx' },
   'QA-03': { e: 'verificado en demo', test: 'web/tests-backend (84 pruebas)' },
   'QA-05': { e: 'en curso', test: 'fundaciones.spec.ts, conexion.spec.ts (24 pruebas)' },
+  'AUD-09': { e: 'verificado en demo', impl: 'web/src/api/url.ts; validación también en transporteHttp', test: 'web/src/api/url.test.ts (14 casos)' },
 }
