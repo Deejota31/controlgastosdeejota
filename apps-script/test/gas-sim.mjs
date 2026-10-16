@@ -24,6 +24,7 @@ export function crearEntorno(opciones = {}) {
   let entorno // se asigna más abajo; el núcleo solo lo usa en tiempo de ejecución
   const S = crearServicios({
     tz,
+    sinLibroActivo: opciones.sinLibroActivo,
     nuevaFecha: (s) => entorno.nuevaFecha(s),
     extras: {
       base64Encode: (x) => Buffer.from(typeof x === 'string' ? Buffer.from(x, 'utf8') : x).toString('base64'),
