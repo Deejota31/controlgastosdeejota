@@ -5,6 +5,7 @@ import { BannerDemo, EstadoSync } from '@/components/EstadoSync'
 import { Logo } from '@/components/Logo'
 import { cn } from '@/lib/cn'
 import { navegar, useRuta } from '@/lib/router'
+import { useFormMov } from '@/store/formMov'
 import { useUi } from '@/store/ui'
 import { NAV_MOVIL, NAV_PRINCIPAL, tituloDe, type ItemNav } from './nav'
 
@@ -159,9 +160,11 @@ function NavTab({ item }: { item: ItemNav }) {
 }
 
 function Fab() {
+  const abrir = useFormMov((s) => s.abrir)
   return (
     <button
       type="button"
+      onClick={() => abrir('nuevo')}
       aria-label="Nuevo gasto"
       className="fixed right-4 bottom-[calc(var(--bottombar-h)+var(--safe-bottom)+16px)] z-30 flex size-14 items-center justify-center rounded-full bg-accent text-white shadow-2 transition-transform duration-150 active:scale-95 md:hidden"
     >

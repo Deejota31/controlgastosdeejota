@@ -6,10 +6,10 @@
 
 ## Resumen (306 requisitos)
 
-- pendiente: **237**
-- verificado en demo: **57**
-- en curso: **11**
-- implementado sin verificar: **1**
+- pendiente: **213**
+- verificado en demo: **66**
+- en curso: **24**
+- implementado sin verificar: **3**
 
 ## Requisitos
 
@@ -119,18 +119,18 @@
 | SEG-13 | Lista blanca de acciones y de claves de configuración | J8 | Backend |  | config.guardar |  |  |  | pendiente |  |
 | UX-01 | Inventario de controles; cada uno con habilitación, acción, carga, éxito, error y recuperación | E1 | Todas |  | — |  |  |  | pendiente |  |
 | UX-02 | Rutas con componentes funcionales propios; ruta desconocida = no encontrada con regreso | E1 | Router |  | — |  |  |  | pendiente |  |
-| UX-03 | Nuevo/Editar/Clonar reutilizan el mismo formulario; clonar crea ID nuevo y conserva la fecha original | E2/J7.5 | Formulario |  | movimiento.guardar |  |  |  | pendiente |  |
-| UX-04 | Descripción por subcategoría con confirmación si el usuario escribió; capitalización idempotente | E2/J7.5 | Formulario |  | — |  |  |  | pendiente |  |
-| UX-05 | Campos dependientes, estados inactivos y mensajes correctos al cambiar ámbito/categoría/alcance | E2 | Formularios |  | — |  |  |  | pendiente |  |
-| UX-06 | Error por campo que se limpia al corregir; foco al primer error; teclado; Enter y Ctrl/Cmd+Enter | E2/J5.4 | Formularios |  | — |  |  |  | pendiente |  |
-| UX-07 | Cambios sin guardar protegidos al cerrar; borrador conservado si falla red o servidor | E2/J5.4 | Formularios |  | — |  |  |  | pendiente |  |
-| UX-08 | Doble clic no crea duplicados; Guardar protege su operación sin bloquear la app | E2/J5.4 | Formularios |  | — |  |  |  | pendiente |  |
-| UX-09 | Selección múltiple persistente con contador visibles/ocultos y vista previa del impacto | E2/J7.5 | Movimientos |  | movimientos.accionLote |  |  |  | pendiente |  |
-| UX-10 | Orden manual persistente y accesible; interacción con paginación y orden por columna definida | E2/J7.5 | Movimientos |  | movimientos.reordenar |  |  |  | pendiente |  |
+| UX-03 | Nuevo/Editar/Clonar reutilizan el mismo formulario; clonar crea ID nuevo y conserva la fecha original | E2/J7.5 | Formulario | app/movimientos/FormMovimiento.tsx (un solo componente para Nuevo/Editar/Clonar) | movimiento.guardar | FormMovimiento.test.tsx (Editar conserva ID y versión; Clonar usa ID nuevo y conserva fecha) |  |  | verificado en demo |  |
+| UX-04 | Descripción por subcategoría con confirmación si el usuario escribió; capitalización idempotente | E2/J7.5 | Formulario | FormMovimiento (autocompletar, Reemplazar/Conservar la mía); shared/descripcion.js idempotente | — | FormMovimiento.test.tsx, paridad.test.mjs |  |  | verificado en demo |  |
+| UX-05 | Campos dependientes, estados inactivos y mensajes correctos al cambiar ámbito/categoría/alcance | E2 | Formularios | lib/catalogo.ts (categorías por ámbito, subcategorías efectivas, inactivas solo si ya eran la del movimiento) | — | FormMovimiento.test.tsx |  |  | en curso | Falta cubrir formularios de caja/plantilla/compromiso |
+| UX-06 | Error por campo que se limpia al corregir; foco al primer error; teclado; Enter y Ctrl/Cmd+Enter | E2/J5.4 | Formularios | FormMovimiento: error por campo, foco al primero, Enter y Ctrl/Cmd+Enter | — | FormMovimiento.test.tsx |  |  | en curso | Falta limpiar el error al corregir bajo prueba y aplicar a los demás formularios |
+| UX-07 | Cambios sin guardar protegidos al cerrar; borrador conservado si falla red o servidor | E2/J5.4 | Formularios | FormMovimiento: ConfirmDialog al cerrar con cambios (botón, Escape) | — | FormMovimiento.test.tsx, e2e/movimientos.spec.ts |  |  | en curso | Si el servidor rechaza tras cerrar, el borrador no se reabre: solo se muestra el error |
+| UX-08 | Doble clic no crea duplicados; Guardar protege su operación sin bloquear la app | E2/J5.4 | Formularios | FormMovimiento: guardia síncrona + ID fijo por formulario; el servidor es idempotente | — | FormMovimiento.test.tsx, e2e/movimientos.spec.ts |  |  | verificado en demo |  |
+| UX-09 | Selección múltiple persistente con contador visibles/ocultos y vista previa del impacto | E2/J7.5 | Movimientos | pages/Movimientos.tsx + BarraSeleccion.tsx: selección persistente entre páginas y filtros, impacto previo | movimientos.accionLote | Movimientos.test.tsx, e2e/movimientos.spec.ts |  |  | en curso | No muestra el contador «visibles/ocultos» por separado |
+| UX-10 | Orden manual persistente y accesible; interacción con paginación y orden por columna definida | E2/J7.5 | Movimientos | components/DragList.tsx (puntero, teclado, botones Subir/Bajar) | movimientos.reordenar | DragList.test.tsx, Movimientos.test.tsx |  |  | en curso | El arrastre con puntero no está probado en navegador real |
 | UX-11 | Toasts arriba a la derecha: éxito breve, errores persistentes con acciones, accesibles | E2/J5.3 | Global | components/Toaster.tsx | — | App.test.tsx |  |  | verificado en demo |  |
-| UX-12 | Responsive 320/375/768/1024/1440/1920 sin recorte ni overflow oculto | E4/J5.2 | Todas |  | — | e2e/fundaciones.spec.ts (6 anchos, rutas actuales) |  |  | en curso |  |
+| UX-12 | Responsive 320/375/768/1024/1440/1920 sin recorte ni overflow oculto | E4/J5.2 | Todas |  | — | e2e/fundaciones.spec.ts, e2e/movimientos.spec.ts (6 anchos; Movimientos y su formulario) |  |  | en curso | Faltan Presupuesto, Catálogo, Salud, Planificación y Dashboard reales |
 | UX-13 | Táctil ≥44 px, etiquetas, contraste, foco visible, scroll del modal, teclado virtual, safe area | E4/J5.2 | Todas |  | — |  |  |  | pendiente |  |
-| UX-14 | Dialogs/drawer: foco inicial, contención, fondo inerte, Escape, devolución de foco; menús en portal | E4/J5.6 | Layout |  | — | e2e/fundaciones.spec.ts (modal) |  |  | en curso |  |
+| UX-14 | Dialogs/drawer: foco inicial, contención, fondo inerte, Escape, devolución de foco; menús en portal | E4/J5.6 | Layout | Modal, ConfirmDialog, Flotante (portal con volteo), MenuAcciones | — | e2e/fundaciones.spec.ts (modal), e2e/movimientos.spec.ts (menú de fila dentro de pantalla), Combobox.test.tsx |  |  | en curso | Falta Drawer con fondo inerte y BottomSheet |
 | UX-15 | Cada KPI/gráfico con explicación accesible; gráficos con tabla/resumen equivalente; vacíos sin datos ficticios | E4/J5.6 | Dashboard |  | — |  |  |  | pendiente |  |
 | UX-16 | Acumulado a todo el ancho; Top 5 alternable; jerarquía contraída; sin gráfico "Últimos 6 meses"; Sankey incluido | E4/J7.4 | Dashboard |  | — |  |  |  | pendiente |  |
 | UX-17 | Un aviso "sin datos" ofrece acción existente; conectado vacío no oculta el alta | E4/J5.5 | Todas |  | — |  |  |  | pendiente |  |
@@ -138,7 +138,7 @@
 | UX-19 | Tema Claro/Oscuro/Sistema con tokens semánticos | J5.1 | Global |  | config.tema |  |  |  | pendiente |  |
 | UX-20 | Paleta de 64 colores sin rojo ni ámbar (fila de 10 + más + HEX libre) y catálogo de ~250 iconos en 13 familias con sinónimos | J5.1 | IconColorPicker |  | — |  |  |  | pendiente |  |
 | UX-21 | Microinteracciones: check al guardar, montos que cuentan, arrastre con sombra; prefers-reduced-motion | J5.1 | Global |  | — |  |  |  | pendiente |  |
-| UX-22 | Componentes: Radio, Combobox, MultiSelect, DatePicker, MonthPicker, RangePicker, MoneyInput, IconColorPicker, BottomSheet, MenuAcciones, Accordion, Pagination, DataTable, DragList, CommandPalette | J5.3 | components/ |  | — |  |  |  | pendiente |  |
+| UX-22 | Componentes: Radio, Combobox, MultiSelect, DatePicker, MonthPicker, RangePicker, MoneyInput, IconColorPicker, BottomSheet, MenuAcciones, Accordion, Pagination, DataTable, DragList, CommandPalette | J5.3 | components/ | Combobox, MultiSelect, MoneyInput, MenuAcciones, Pagination, DragList, ChipSelect, Campo, Flotante | — | Combobox.test.tsx, DragList.test.tsx, MoneyInput.test.ts |  |  | en curso | Faltan DatePicker/MonthPicker/RangePicker propios (se usa input nativo), IconColorPicker, BottomSheet, Accordion, DataTable genérica, CommandPalette |
 | UX-23 | Catálogo de componentes /#/ui solo en desarrollo y demo | J5.3 | /ui | app/pages/UiCatalog.tsx | — | App.test.tsx, e2e |  |  | verificado en demo |  |
 | UX-24 | Estados de pantalla: sin conexión, cargando (skeleton), vacío propio, error con reintentar, offline con banner | J5.5 | Todas |  | — |  |  |  | pendiente |  |
 | UX-25 | WCAG 2.2 AA: roles ARIA, teclado completo, etiquetas, gráficos con tabla | J5.6 | Todas |  | — |  |  |  | pendiente |  |
@@ -195,21 +195,21 @@
 | DSH-06 | Mini tarjetas de cajas con progreso y estado | J7.4 | Inicio |  | — |  |  |  | pendiente |  |
 | DSH-07 | Análisis: Jerarquía (contraída), Flujo de medios (Sankey SVG), Frecuencia vs monto (burbujas) | J7.4 | Inicio |  | — |  |  |  | pendiente |  |
 | DSH-08 | Mes sin configurar: Preparar mi mes / Copiar del mes anterior | J7.4 | Inicio |  | — |  |  |  | pendiente |  |
-| MOV-01 | Formulario: ámbito en chips con icono; categoría dependiente solo activas; subcategoría obligatoria si hay | J7.5 | Formulario |  | movimiento.guardar |  |  |  | pendiente |  |
-| MOV-02 | Descripción: autocompleta con subcategoría, Reemplazar/Conservar, Otros/Por Clasificar vacía, normaliza al salir | J7.5 | Formulario |  | — |  |  |  | pendiente |  |
-| MOV-03 | Monto grande, moneda permitida y equivalente en base en vivo | J7.5 | Formulario |  | — |  |  |  | pendiente |  |
-| MOV-04 | Fecha hoy viva; al clonar conserva la original | J7.5 | Formulario |  | — |  |  |  | pendiente |  |
-| MOV-05 | Tipo de gasto, medio (botones con color, activos) y recurrente | J7.5 | Formulario |  | — |  |  |  | pendiente |  |
-| MOV-06 | Comprobante URL https opcional y notas | J7.5 | Formulario |  | — |  |  |  | pendiente |  |
-| MOV-07 | Sugerencia inteligente de clasificación según descripción | J7.5 | Formulario |  | — |  |  |  | pendiente |  |
-| MOV-08 | Tabla: columnas, orden, paginación 10/25/50/100 con "Mostrando a–b de N", búsqueda por texto/monto/medio | J7.5 | Movimientos |  | — |  |  |  | pendiente |  |
-| MOV-09 | Vistas Activos/Anulados/Todos; Restaurar en anulados; totales con conversión y sin anulados | J7.5 | Movimientos |  | movimiento.anular\|restaurar |  |  |  | pendiente |  |
-| MOV-10 | Selección múltiple persistente: anular, restaurar, cambiar categoría/medio en lote, todo o nada | J7.5 | Movimientos |  | movimientos.accionLote |  |  |  | pendiente |  |
-| MOV-11 | Orden manual: arrastrar en escritorio, ↑↓ en móvil | J7.5 | Movimientos |  | movimientos.reordenar |  |  |  | pendiente |  |
-| MOV-12 | Exportar CSV/Excel del período filtrado y del historial completo | J7.5 | Movimientos |  | exportar.csv |  |  |  | pendiente |  |
-| MOV-13 | Historial de cambios por movimiento (auditoría) | J7.5 | Movimientos |  | auditoria.consultar |  |  |  | pendiente |  |
-| MOV-14 | Abrir un movimiento resaltado desde Salud/Compromisos con botón Volver | J7.5 | Movimientos |  | — |  |  |  | pendiente |  |
-| MOV-15 | Tabla móvil como tarjetas de dos líneas con ⋯ como alternativa al deslizar | J5.2 | Movimientos |  | — |  |  |  | pendiente |  |
+| MOV-01 | Formulario: ámbito en chips con icono; categoría dependiente solo activas; subcategoría obligatoria si hay | J7.5 | Formulario | FormMovimiento + lib/catalogo.ts | movimiento.guardar | FormMovimiento.test.tsx |  |  | en curso | Los chips de ámbito aún no llevan icono |
+| MOV-02 | Descripción: autocompleta con subcategoría, Reemplazar/Conservar, Otros/Por Clasificar vacía, normaliza al salir | J7.5 | Formulario | FormMovimiento (autocompletado y confirmación) | — | FormMovimiento.test.tsx |  |  | en curso | Falta el caso Otros/Por Clasificar vacío y normalizar al salir del campo (se normaliza al guardar) |
+| MOV-03 | Monto grande, moneda permitida y equivalente en base en vivo | J7.5 | Formulario | MoneyInput + FormMovimiento (equivalente en base con el tipo de cambio vigente o el congelado al editar) | — | FormMovimiento.test.tsx, MoneyInput.test.ts |  |  | verificado en demo |  |
+| MOV-04 | Fecha hoy viva; al clonar conserva la original | J7.5 | Formulario | FormMovimiento: fecha viva mientras no se toque (useHoy); Clonar conserva la original | — | FormMovimiento.test.tsx (clonar), fechaViva.test.tsx (hook) |  |  | implementado sin verificar | Falta prueba de que el formulario nuevo sigue a la medianoche |
+| MOV-05 | Tipo de gasto, medio (botones con color, activos) y recurrente | J7.5 | Formulario | FormMovimiento: tipo (Segmented), medio (Combobox solo activos), recurrente | — | FormMovimiento.test.tsx |  |  | en curso | El medio no se muestra como botones con color |
+| MOV-06 | Comprobante URL https opcional y notas | J7.5 | Formulario | FormMovimiento + lib/catalogo.ts urlComprobanteValida (misma regla que el servidor) | — | FormMovimiento.test.tsx |  |  | verificado en demo |  |
+| MOV-07 | Sugerencia inteligente de clasificación según descripción | J7.5 | Formulario | FormMovimiento: sugiere medio y tipo del último movimiento de la misma subcategoría | — | ninguna dedicada |  |  | en curso | La especificación pide sugerir según la descripción escrita; no implementado |
+| MOV-08 | Tabla: columnas, orden, paginación 10/25/50/100 con "Mostrando a–b de N", búsqueda por texto/monto/medio | J7.5 | Movimientos | pages/Movimientos.tsx (columnas, orden, paginación 10/25/50/100, búsqueda por texto, categoría y medio) | — | Movimientos.test.tsx, consulta.test.ts |  |  | en curso | La búsqueda no filtra por monto |
+| MOV-09 | Vistas Activos/Anulados/Todos; Restaurar en anulados; totales con conversión y sin anulados | J7.5 | Movimientos | Movimientos.tsx + consulta.ts (totales en céntimos con monto_base, anulados no suman) | movimiento.anular\|restaurar | consulta.test.ts, Movimientos.test.tsx |  |  | verificado en demo |  |
+| MOV-10 | Selección múltiple persistente: anular, restaurar, cambiar categoría/medio en lote, todo o nada | J7.5 | Movimientos | BarraSeleccion.tsx + reductor movimientos.accionLote + Code.gs accionMovimientosAccionLote (todo o nada) | movimientos.accionLote | Movimientos.test.tsx, optimista.test.ts, backend.test.mjs |  |  | verificado en demo |  |
+| MOV-11 | Orden manual: arrastrar en escritorio, ↑↓ en móvil | J7.5 | Movimientos | DragList + movimientos.reordenar (hasta 1000 filtrados) | movimientos.reordenar | DragList.test.tsx, Movimientos.test.tsx |  |  | en curso | Arrastre con puntero sin probar en navegador real |
+| MOV-12 | Exportar CSV/Excel del período filtrado y del historial completo | J7.5 | Movimientos | lib/exportar.ts (CSV y XLSX propios, fórmulas neutralizadas) | exportar.csv | exportar.test.ts |  | XLSX de muestra leído con openpyxl (hoja, textos, número y fórmula neutralizada) | verificado en demo | No abierto con Excel real |
+| MOV-13 | Historial de cambios por movimiento (auditoría) | J7.5 | Movimientos | movimientos/Historial.tsx sobre auditoria.consultar | auditoria.consultar | Historial.test.tsx |  |  | verificado en demo |  |
+| MOV-14 | Abrir un movimiento resaltado desde Salud/Compromisos con botón Volver | J7.5 | Movimientos | Movimientos.tsx: ?resaltar=<id>&volver=<ruta> | — |  |  |  | implementado sin verificar | Sin prueba; Salud y Compromisos aún no existen |
+| MOV-15 | Tabla móvil como tarjetas de dos líneas con ⋯ como alternativa al deslizar | J5.2 | Movimientos | Movimientos.tsx: tarjetas bajo 768 px con menú ⋯ | — | Movimientos.test.tsx, e2e (móvil) |  |  | en curso | Sin gesto de deslizar |
 | GM-01 | Plantilla de gasto: datos completos, "Es compromiso" con día; "Requiere revisión" si su clasificación quedó inactiva | J7.6/E3 | Gastos del mes |  | plantilla.guardar |  |  |  | pendiente |  |
 | GM-02 | Modal ancho: fecha, búsqueda, filtro ámbito, casillas, Todas/Visibles/Limpiar | J7.6 | Gastos del mes |  | — |  |  |  | pendiente |  |
 | GM-03 | Edición en línea temporal de monto/moneda/medio sin modificar la plantilla | J7.6/E3 | Gastos del mes |  | — |  |  |  | pendiente |  |

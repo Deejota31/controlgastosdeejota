@@ -93,6 +93,39 @@ export const REDUCTORES: Record<string, Reductor> = {
   },
 }
 
+REDUCTORES['movimientos.accionLote'] = (h, p, c) => {
+  const ids = new Set(Array.isArray(p['ids']) ? (p['ids'] as unknown[]).filter((x): x is string => typeof x === 'string') : [])
+  const accion = str(p, 'accion')
+  // Todo o nada: si falta alguno o la acción no aplica a alguno, el servidor rechazará el lote entero; aquí no se aplica nada.
+  const objetivo = h.movimientos.filter((m) => ids.has(m.id))
+  if (objetivo.length !== ids.size) return h
+  if ((accion === 'medio' || accion === 'categoria') && objetivo.some((m) => m.estado === 'anulado')) return h
+  const cambia = (m: Movimiento): Movimiento => {
+    if (accion === 'anular') return m.estado === 'anulado' ? m : { ...m, estado: 'anulado' }
+    if (accion === 'restaurar') return m.estado === 'activo' ? m : { ...m, estado: 'activo' }
+    if (accion === 'medio') return { ...m, medio_pago_id: str(p, 'medio_pago_id', m.medio_pago_id) }
+    if (accion === 'categoria')
+      return { ...m, ambito_id: str(p, 'ambito_id', m.ambito_id), categoria_id: str(p, 'categoria_id', m.categoria_id), subcategoria_id: str(p, 'subcategoria_id') }
+    return m
+  }
+  const movimientos = h.movimientos.map((m) => {
+    if (!ids.has(m.id)) return m
+    const n = cambia(m)
+    return n === m ? m : { ...n, actualizado_en: c.ahora, version: m.version + 1 }
+  })
+  return { ...h, movimientos }
+}
+
+REDUCTORES['movimientos.reordenar'] = (h, p) => {
+  const items = Array.isArray(p['items']) ? (p['items'] as Array<Record<string, unknown>>) : []
+  const mapa = new Map(h.orden_movimientos.map((o) => [o.movimiento_id, o] as const))
+  for (const it of items) {
+    const id = str(it, 'movimiento_id')
+    if (id) mapa.set(id, { movimiento_id: id, orden: Number(it['orden']) })
+  }
+  return { ...h, orden_movimientos: [...mapa.values()] }
+}
+
 export function aplicarPendientes(
   confirmado: Hojas,
   pendientes: ReadonlyArray<{ action: string; payload: Record<string, unknown> }>,

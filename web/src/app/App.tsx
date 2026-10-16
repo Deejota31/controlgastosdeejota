@@ -10,6 +10,8 @@ import { SinConexion } from './pages/SinConexion'
 import { EnConstruccion } from './pages/EnConstruccion'
 import { Configuracion } from './pages/Configuracion'
 import { Inicio } from './pages/Inicio'
+import { Movimientos } from './pages/Movimientos'
+import { FormMovimientoGlobal } from './movimientos/FormGlobal'
 import { UiCatalog } from './pages/UiCatalog'
 import { NAV_PRINCIPAL } from './nav'
 
@@ -27,6 +29,13 @@ function Pantalla({ path }: { path: string }) {
     return (
       <Gate modulo="Inicio">
         <Inicio />
+      </Gate>
+    )
+  }
+  if (path === '/movimientos') {
+    return (
+      <Gate modulo="Movimientos">
+        <Movimientos />
       </Gate>
     )
   }
@@ -92,6 +101,7 @@ export function App() {
       <Layout>
         <Pantalla path={path} />
       </Layout>
+      <FormMovimientoGlobal />
       <Toaster />
     </>
   )

@@ -31,8 +31,8 @@ Entorno de pruebas aislado: pendiente de crear por el propietario o de recibir u
 | Fase | Contenido | Estado |
 |---|---|---|
 | 0 | Diagnóstico, matriz y estado | En curso (matriz y estado creados) |
-| A | Transversales: fecha viva, URL estricta, demo único, cola/idempotencia, API.md, entorno de pruebas | Pendiente |
-| B | Componentes base, formulario único y Movimientos | Pendiente |
+| A | Transversales: fecha viva, URL estricta, demo único, cola/idempotencia, API.md, entorno de pruebas | Hecha (verificada con simulador y demo) |
+| B | Componentes base, formulario único y Movimientos | Parcial: formulario único, Movimientos completos (filtros, orden, paginación, lote, exportación, historial) y 9 componentes base; faltan DatePicker/MonthPicker/RangePicker propios, IconColorPicker, BottomSheet, Accordion, DataTable genérica y CommandPalette (ver matriz UX-22) |
 | C | Catálogo y Presupuesto | Pendiente |
 | D | Gastos del mes y compromisos | Pendiente |
 | E | Dashboard y filtros globales | Pendiente |
@@ -43,9 +43,11 @@ Entorno de pruebas aislado: pendiente de crear por el propietario o de recibir u
 
 ## Próximo paso
 
-Fase A: `useHoy`, validación estricta de URL, demo único, deduplicación durable, cola con pendiente de confirmar.
+Fase C: Catálogo (ámbitos, categorías, subcategorías, medios con reordenar y selectores de icono/color) y Presupuesto (fuentes, cajas, plantillas mensuales, copiar mes). Los componentes que faltan de la Fase B se construyen cuando esas pantallas los necesiten.
 
 ## Bloqueos conocidos
 
 - **Integración real (F1.6 / QA-06):** requiere un deployment de Apps Script y una hoja exclusivos de pruebas. Esta sesión no puede crear ni publicar deployments de Apps Script. Se entregará el procedimiento exacto y las suites listas; hasta que el propietario provea el entorno, esos requisitos quedan como «bloqueado».
 - **Lighthouse real sobre Netlify y cabeceras HTTP reales (SEG-11):** requieren acceso de red a la URL pública desde esta sesión; se intentará con las herramientas disponibles y, si no, se documentará.
+- **Excel real:** el `.xlsx` exportado se leyó con openpyxl, no con Microsoft Excel ni Google Sheets.
+- **Arrastre con puntero:** `DragList` tiene pruebas de teclado y botones; el arrastre con ratón/toque no se ha probado en navegador real.

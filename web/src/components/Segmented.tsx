@@ -9,7 +9,7 @@ export interface SegmentedProps<T extends string> {
 
 export function Segmented<T extends string>({ value, onChange, opciones, etiqueta }: SegmentedProps<T>) {
   return (
-    <div role="radiogroup" aria-label={etiqueta} className="inline-flex rounded-ctl bg-surface-2 p-1">
+    <div role="radiogroup" aria-label={etiqueta} className="inline-flex max-w-full flex-wrap rounded-ctl bg-surface-2 p-1">
       {opciones.map((o) => (
         <button
           key={o.valor}
